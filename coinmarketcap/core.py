@@ -24,7 +24,7 @@ class Market(object):
 	@property
 	def session(self):
 		if not self._session:
-			self._session = requests_cache.core.CachedSession(cache_name=self.cache_name, backend='sqlite', expire_after=120)
+			self._session = requests_cache.CachedSession(cache_name=self.cache_name, backend='sqlite', expire_after=120)
 			self._session.headers.update({'Content-Type': 'application/json'})
 			self._session.headers.update({'User-agent': 'coinmarketcap - python wrapper around \
 			                             coinmarketcap.com (github.com/barnumbirr/coinmarketcap)'})
