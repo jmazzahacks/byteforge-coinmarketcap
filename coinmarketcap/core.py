@@ -9,6 +9,28 @@ import tempfile
 import requests_cache
 from .types.token_state import TokenState
 from typing import List
+from enum import Enum
+
+class SortOption(Enum):
+    MARKET_CAP = "market_cap"
+    MARKET_CAP_STRICT = "market_cap_strict"
+    NAME = "name"
+    SYMBOL = "symbol"
+    DATE_ADDED = "date_added"
+    PRICE = "price"
+    CIRCULATING_SUPPLY = "circulating_supply"
+    TOTAL_SUPPLY = "total_supply"
+    MAX_SUPPLY = "max_supply"
+    NUM_MARKET_PAIRS = "num_market_pairs"
+    MARKET_CAP_BY_TOTAL_SUPPLY_STRICT = "market_cap_by_total_supply_strict"
+    VOLUME_24H = "volume_24h"
+    VOLUME_7D = "volume_7d"
+    VOLUME_30D = "volume_30d"
+    PERCENT_CHANGE_1H = "percent_change_1h"
+    PERCENT_CHANGE_24H = "percent_change_24h"
+    PERCENT_CHANGE_7D = "percent_change_7d"
+
+
 
 class Market(object):
 
@@ -58,20 +80,22 @@ class Market(object):
 			if response_object.status_code == requests.codes.ok:
 				return response_object.json()
 			else:
-				# TODO - this probably isn';t the best way to handle this
-				response_object.raise_for_status()				
+				raise Exception(f"Server returned {response_object.status_code} - {response_object.text}")
 		except Exception as e:
 			raise e
 
 
-	def listings(self) -> List[TokenState]:
+	# TODO - there are a TON of optional parameters for this endpoint
+	# let's start with adding the sort order options.
+	def listings(self, sort_by : SortOption = SortOption.MARKET_CAP) -> List[TokenState]:
 		"""
 		This endpoint displays all active cryptocurrency listings in one call. Use the
 		"id" field on the Ticker endpoint to query more information on a specific
 		cryptocurrency.
 		"""
 
-		response = self.__request('v1/cryptocurrency/listings/latest', params=None)
+		params = {'sort': sort_by.value}
+		response = self.__request('v1/cryptocurrency/listings/latest', params=params)
 		token_states = []
 		for token in response['data']:
 			token_states.append(TokenState.from_dict(token))
@@ -79,45 +103,7 @@ class Market(object):
 		return token_states
 	
 
-	def ticker(self, currency="", **kwargs):
-		"""
-		This endpoint displays cryptocurrency ticker data in order of rank. The maximum
-		number of results per call is 100. Pagination is possible by using the
-		start and limit parameters.
-
-		GET /ticker/
-
-		Optional parameters:
-	    (int) start - return results from rank [start] and above (default is 1)
-	    (int) limit - return a maximum of [limit] results (default is 100; max is 100)
-	    (string) convert - return pricing info in terms of another currency.
-	    Valid fiat currency values are: "AUD", "BRL", "CAD", "CHF", "CLP", "CNY", "CZK",
-	    "DKK", "EUR", "GBP", "HKD", "HUF", "IDR", "ILS", "INR", "JPY", "KRW", "MXN",
-	    "MYR", "NOK", "NZD", "PHP", "PKR", "PLN", "RUB", "SEK", "SGD", "THB", "TRY",
-	    "TWD", "ZAR"
-	    Valid cryptocurrency values are: "BTC", "ETH" "XRP", "LTC", and "BCH"
-
-		GET /ticker/{id}
-
-		Optional parameters:
-		(string) convert - return pricing info in terms of another currency.
-    	Valid fiat currency values are: "AUD", "BRL", "CAD", "CHF", "CLP", "CNY", "CZK",
-    	"DKK", "EUR", "GBP", "HKD", "HUF", "IDR", "ILS", "INR", "JPY", "KRW", "MXN",
-    	"MYR", "NOK", "NZD", "PHP", "PKR", "PLN", "RUB", "SEK", "SGD", "THB", "TRY",
-    	"TWD", "ZAR"
-    	Valid cryptocurrency values are: "BTC", "ETH" "XRP", "LTC", and "BCH"
-		"""
-
-		params = {}
-		params.update(kwargs)
-
-		# see https://github.com/barnumbirr/coinmarketcap/pull/28
-		if currency:
-			currency = str(currency) + '/'
-
-		response = self.__request('ticker/' + currency, params)
-		return response
-
+	# TODO - this should call global metrics endpoint
 	def stats(self, **kwargs):
 		"""
 		This endpoint displays the global data found at the top of coinmarketcap.com.
