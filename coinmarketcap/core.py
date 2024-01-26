@@ -84,14 +84,16 @@ class Market(object):
 
 	# TODO - there are a TON of optional parameters for this endpoint
 	# let's start with adding the sort order options.
-	def listings(self, sort_by : SortOption = SortOption.MARKET_CAP) -> List[TokenState]:
-		"""
-		This endpoint displays all active cryptocurrency listings in one call. Use the
-		"id" field on the Ticker endpoint to query more information on a specific
-		cryptocurrency.
-		"""
+	def listings(self, sort_by : SortOption = SortOption.MARKET_CAP, sort_dir: str='desc') -> List[TokenState]:
 
-		params = {'sort': sort_by.value}
+		if sort_dir not in ['asc', 'desc']:
+			raise ValueError("sort_dir must be 'asc' or 'desc'")
+
+		params = {
+			'sort': sort_by.value,
+			'sort_dir': sort_dir
+		}
+
 		response = self.__request('v1/cryptocurrency/listings/latest', params=params)
 		token_states = []
 		for token in response['data']:
