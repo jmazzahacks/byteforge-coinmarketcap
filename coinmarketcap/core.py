@@ -81,26 +81,22 @@ class Market(object):
 		except Exception as e:
 			raise e
 
-
-	# TODO - there are a TON of optional parameters for this endpoint
-	# let's start with adding the sort order options.
-	def listings(self, sort_by : SortOption = SortOption.MARKET_CAP, sort_dir: str='desc') -> List[TokenState]:
-
+	def listings_latest(self, sort_by: SortOption = SortOption.MARKET_CAP, sort_dir: str = 'desc', start: int = 1, limit: int = 100) -> List[TokenState]:
 		if sort_dir not in ['asc', 'desc']:
 			raise ValueError("sort_dir must be 'asc' or 'desc'")
 
 		params = {
 			'sort': sort_by.value,
-			'sort_dir': sort_dir
+			'sort_dir': sort_dir,
+			'start': start,
+			'limit': limit
 		}
 
 		response = self.__request('v1/cryptocurrency/listings/latest', params=params)
-		token_states = []
-		for token in response['data']:
-			token_states.append(TokenState.from_dict(token))
+		token_states = [TokenState.from_dict(token) for token in response['data']]
 
 		return token_states
-	
+
 
 	# TODO - this should call global metrics endpoint
 	def stats(self, **kwargs):
