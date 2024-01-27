@@ -81,7 +81,7 @@ class Market(object):
 		except Exception as e:
 			raise e
 
-	def listings_latest(self, sort_by: SortOption = SortOption.MARKET_CAP, sort_dir: str = 'desc', start: int = 1, limit: int = 100) -> List[TokenState]:
+	def listings_latest(self, sort_by: SortOption = SortOption.MARKET_CAP, sort_dir: str = 'desc', start: int = 1, limit: int = 100, convert: str = None) -> List[TokenState]:
 		if sort_dir not in ['asc', 'desc']:
 			raise ValueError("sort_dir must be 'asc' or 'desc'")
 
@@ -91,6 +91,9 @@ class Market(object):
 			'start': start,
 			'limit': limit
 		}
+		
+		if convert:
+			params['convert'] = convert
 
 		response = self.__request('v1/cryptocurrency/listings/latest', params=params)
 		token_states = [TokenState.from_dict(token) for token in response['data']]
