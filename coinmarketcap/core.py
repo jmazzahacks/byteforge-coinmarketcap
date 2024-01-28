@@ -5,8 +5,24 @@ import requests
 import tempfile
 import requests_cache
 from .types.token_state import TokenState
-from typing import List
+from typing import List, Optional
 from enum import Enum
+from dataclasses import dataclass
+
+@dataclass
+class FilterOptions:
+    price_min: Optional[float] = None
+    price_max: Optional[float] = None
+    market_cap_min: Optional[float] = None
+    market_cap_max: Optional[float] = None
+    volume_24h_min: Optional[float] = None
+    volume_24h_max: Optional[float] = None
+    circulating_supply_min: Optional[float] = None
+    circulating_supply_max: Optional[float] = None
+    percent_change_24h_min: Optional[float] = None
+    percent_change_24h_max: Optional[float] = None
+    tags: Optional[List[str]] = None
+
 
 class SortOption(Enum):
     MARKET_CAP = "market_cap"
@@ -26,7 +42,6 @@ class SortOption(Enum):
     PERCENT_CHANGE_1H = "percent_change_1h"
     PERCENT_CHANGE_24H = "percent_change_24h"
     PERCENT_CHANGE_7D = "percent_change_7d"
-
 
 
 class Market(object):
@@ -81,7 +96,9 @@ class Market(object):
 		except Exception as e:
 			raise e
 
-	def listings_latest(self, sort_by: SortOption = SortOption.MARKET_CAP, sort_dir: str = 'desc', start: int = 1, limit: int = 100, convert: str = None) -> List[TokenState]:
+
+	def listings_latest(self, sort_by: SortOption = SortOption.MARKET_CAP, sort_dir: str = 'desc', start: int = 1, limit: int = 100, convert: str = None, filters: FilterOptions = None) -> List[TokenState]:
+		
 		if sort_dir not in ['asc', 'desc']:
 			raise ValueError("sort_dir must be 'asc' or 'desc'")
 
@@ -94,6 +111,30 @@ class Market(object):
 		
 		if convert:
 			params['convert'] = convert
+
+		if filters:
+			if filters.price_min is not None:
+				params['price_min'] = filters.price_min
+			if filters.price_max is not None:
+				params['price_max'] = filters.price_max
+			if filters.market_cap_min is not None:
+				params['market_cap_min'] = filters.market_cap_min
+			if filters.market_cap_max is not None:
+				params['market_cap_max'] = filters.market_cap_max
+			if filters.volume_24h_min is not None:
+				params['volume_24h_min'] = filters.volume_24h_min
+			if filters.volume_24h_max is not None:
+				params['volume_24h_max'] = filters.volume_24h_max
+			if filters.circulating_supply_min is not None:
+				params['circulating_supply_min'] = filters.circulating_supply_min
+			if filters.circulating_supply_max is not None:
+				params['circulating_supply_max'] = filters.circulating_supply_max
+			if filters.percent_change_24h_min is not None:
+				params['percent_change_24h_min'] = filters.percent_change_24h_min
+			if filters.percent_change_24h_max is not None:
+				params['percent_change_24h_max'] = filters.percent_change_24h_max
+			if filters.tags:
+				params['tag'] = ','.join(filters.tags)
 
 		response = self.__request('v1/cryptocurrency/listings/latest', params=params)
 		token_states = [TokenState.from_dict(token) for token in response['data']]
