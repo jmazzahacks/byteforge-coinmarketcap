@@ -24,6 +24,23 @@ class FilterOptions:
     tags: Optional[List[str]] = None
 
 
+class AuxFields(Enum):
+    NUM_MARKET_PAIRS = "num_market_pairs"
+    CMC_RANK = "cmc_rank"
+    DATE_ADDED = "date_added"
+    TAGS = "tags"
+    PLATFORM = "platform"
+    MAX_SUPPLY = "max_supply"
+    TOTAL_SUPPLY = "total_supply"
+    MARKET_CAP_BY_TOTAL_SUPPLY = "market_cap_by_total_supply"
+    VOLUME_24H_REPORTED = "volume_24h_reported"
+    VOLUME_7D = "volume_7d"
+    VOLUME_7D_REPORTED = "volume_7d_reported"
+    VOLUME_30D = "volume_30d"
+    VOLUME_30D_REPORTED = "volume_30d_reported"
+    IS_MARKET_CAP_INCLUDED = "is_market_cap_included_in_calc"
+
+
 class SortOption(Enum):
     MARKET_CAP = "market_cap"
     MARKET_CAP_STRICT = "market_cap_strict"
@@ -97,7 +114,7 @@ class Market(object):
 			raise e
 
 
-	def listings_latest(self, sort_by: SortOption = SortOption.MARKET_CAP, sort_dir: str = 'desc', start: int = 1, limit: int = 100, convert: str = None, filters: FilterOptions = None) -> List[TokenState]:
+	def listings_latest(self, sort_by: SortOption = SortOption.MARKET_CAP, sort_dir: str = 'desc', start: int = 1, limit: int = 100, convert: str = None, aux_fields: AuxFields = None, filters: FilterOptions = None) -> List[TokenState]:
 		
 		if sort_dir not in ['asc', 'desc']:
 			raise ValueError("sort_dir must be 'asc' or 'desc'")
@@ -111,6 +128,11 @@ class Market(object):
 		
 		if convert:
 			params['convert'] = convert
+
+		if aux_fields:
+			# Include the "aux" fields in the params
+			aux_field_values = [field.value for field in aux_fields]
+			params['aux'] = ','.join(aux_field_values)
 
 		if filters:
 			if filters.price_min is not None:

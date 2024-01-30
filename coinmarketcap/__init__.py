@@ -10,3 +10,4 @@ __license__ = 'Apache v2.0 License'
 from .core import Market
 from .core import SortOption
 from .core import FilterOptions
+from .core import AuxFields

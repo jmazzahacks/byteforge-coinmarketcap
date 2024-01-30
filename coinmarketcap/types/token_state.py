@@ -19,6 +19,14 @@ class Quote:
     tvl: Optional[float]
     last_updated: datetime.datetime
 
+    # aux fields
+    volume_30d: Optional[float] = None
+    volume_30d_reported: Optional[float] = None
+    volume_24h_reported: Optional[float] = None
+    volume_7d_reported: Optional[float] = None
+    market_cap_by_total_supply: Optional[float] = None
+    volume_7d: Optional[float] = None
+
     @staticmethod
     def from_dict(data: Dict) -> 'Quote':
         return Quote(**data)
@@ -29,24 +37,42 @@ class TokenState:
     name: str
     symbol: str
     slug: str
-    num_market_pairs: int
-    date_added: datetime.datetime
-    tags: List[str]
-    max_supply: int
-    circulating_supply: int
-    total_supply: int
+    last_updated: datetime.datetime
     infinite_supply: bool
+    quote: Dict[str, Quote]
+    num_market_pairs: Optional[int]
+    date_added: Optional[datetime.datetime]
+    tags: Optional[List[str]]
+    max_supply: Optional[int]
+    circulating_supply: Optional[int]
+    total_supply: Optional[int]
     platform: Optional[str]
-    cmc_rank: int
+    cmc_rank: Optional[int]
     self_reported_circulating_supply: Optional[int]
     self_reported_market_cap: Optional[float]
     tvl_ratio: Optional[float]
-    last_updated: datetime.datetime
-    quote: Dict[str, Quote]
+    is_market_cap_included_in_calc: Optional[bool]
 
     @staticmethod
     def from_dict(data: Dict) -> 'TokenState':
         data = data.copy()
         data['quote'] = {k: Quote.from_dict(v) for k, v in data['quote'].items()}
-        return TokenState(**data)
 
+        # Set optional attributes to None if not present in the data
+        for attr_name in [
+            'num_market_pairs',
+            'date_added',
+            'tags',
+            'max_supply',
+            'circulating_supply',
+            'total_supply',
+            'platform',
+            'cmc_rank',
+            'self_reported_circulating_supply',
+            'self_reported_market_cap',
+            'tvl_ratio'
+        ]:
+            if attr_name not in data:
+                data[attr_name] = None
+
+        return TokenState(**data)
