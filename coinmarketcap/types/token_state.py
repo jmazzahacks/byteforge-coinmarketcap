@@ -45,7 +45,7 @@ class TokenState:
     tags: Optional[List[str]]
     max_supply: Optional[int]
     circulating_supply: Optional[int]
-    total_supply: Optional[int]
+    total_supply: Optional[float]
     platform: Optional[str]
     cmc_rank: Optional[int]
     self_reported_circulating_supply: Optional[int]
@@ -56,23 +56,22 @@ class TokenState:
     @staticmethod
     def from_dict(data: Dict) -> 'TokenState':
         data = data.copy()
+
+        # Convert 'is_market_cap_included_in_calc' from 0/1 to False/True
+        if 'is_market_cap_included_in_calc' in data:
+            data['is_market_cap_included_in_calc'] = bool(data['is_market_cap_included_in_calc'])
+
         data['quote'] = {k: Quote.from_dict(v) for k, v in data['quote'].items()}
 
         # Set optional attributes to None if not present in the data
-        for attr_name in [
-            'num_market_pairs',
-            'date_added',
-            'tags',
-            'max_supply',
-            'circulating_supply',
-            'total_supply',
-            'platform',
-            'cmc_rank',
-            'self_reported_circulating_supply',
-            'self_reported_market_cap',
-            'tvl_ratio'
-        ]:
+        optional_fields = [
+            'num_market_pairs', 'date_added', 'tags', 'max_supply', 'circulating_supply',
+            'total_supply', 'platform', 'cmc_rank', 'self_reported_circulating_supply',
+            'self_reported_market_cap', 'tvl_ratio'
+        ]
+        for attr_name in optional_fields:
             if attr_name not in data:
                 data[attr_name] = None
 
         return TokenState(**data)
+
