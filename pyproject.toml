@@ -20,14 +20,15 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 urls = {
-    "Bug Reports": "https://github.com/barnumbirr/coinmarketcap/issues",
+    "Home": "https://github.com/jmazzahacks/py-cmc/"
+    "Bug Reports": "https://github.com/jmazzahacks/py-cmc/issues",
 }
 
 [project.optional-dependencies]
 # Define any optional dependencies here if needed
 
 [tool.setuptools]
-packages = ["coinmarketcap"]
+packages = ["py-cmc"]
 install_requires = [
     "requests>=2.18.4",
     "requests_cache>=0.4.13"
