@@ -1,35 +1,26 @@
 [build-system]
-requires = ["setuptools>=40.6.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "py-cmc"
 version = "0.1.0"
+authors = [{ name = "Jason Byteforgia"}]
 description = "Python SDK for the coinmarketcap.com API."
 readme = "README.md"
-authors = [{ name = "Jason Byteforgia"}]
 license = { file="LICENSE" }
 keywords = ["cryptocurrency", "API", "coinmarketcap", "BTC", "Bitcoin", "LTC", "Litecoin", "XRP", "Ripple", "ETH", "Ethereum"]
+requires-python = ">=3.8"
 classifiers = [
-    "License :: OSI Approved :: Apache Software License",
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3.6",
-    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
 ]
-urls = {
-    "Home": "https://github.com/jmazzahacks/py-cmc/"
-    "Bug Reports": "https://github.com/jmazzahacks/py-cmc/issues",
-}
+
+[project.urls]
+Homepage = "https://github.com/jmazzahacks/py-cmc/"
+Issues = "https://github.com/jmazzahacks/py-cmc/issues"
 
 [project.optional-dependencies]
 # Define any optional dependencies here if needed
 
-[tool.setuptools]
-packages = ["py-cmc"]
-install_requires = [
-    "requests>=2.18.4",
-    "requests_cache>=0.4.13"
-]
