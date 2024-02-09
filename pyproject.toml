@@ -24,3 +24,5 @@ Issues = "https://github.com/jmazzahacks/py-cmc/issues"
 [project.optional-dependencies]
 # Define any optional dependencies here if needed
 
+[tool.hatch.build.targets.wheel]
+packages = ["/coinmarketcap"]
