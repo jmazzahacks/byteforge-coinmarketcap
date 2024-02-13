@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "py-cmc"
+name = "byteforge-coinmarketcap"
 version = "0.1.0"
 authors = [{ name = "Jason Byteforgia"}]
 description = "Python SDK for the coinmarketcap.com API."
@@ -18,8 +18,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jmazzahacks/py-cmc/"
-Issues = "https://github.com/jmazzahacks/py-cmc/issues"
+Homepage = "https://github.com/jmazzahacks/byteforge-coinmarketcap/"
+Issues = "https://github.com/jmazzahacks/byteforge-coinmarketcap/issues"
 
 [project.optional-dependencies]
 # Define any optional dependencies here if needed
