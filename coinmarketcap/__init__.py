@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 __title__ = 'coinmarketcap'
-__version__ = '5.0.3'
-__author__ = 'Martin Simon <me@martinsimon.me>'
-__repo__ = 'https://github.com/barnumbirr/coinmarketcap'
+__version__ = '0.1.2'
+__author__ = 'Jason Byteforgia'
+__repo__ = 'zhttps://github.com/jmazzahacks/byteforge-coinmarketcap'
 __license__ = 'Apache v2.0 License'
 
 from .core import Market
