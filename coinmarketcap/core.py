@@ -40,6 +40,9 @@ class AuxFields(Enum):
     VOLUME_30D_REPORTED = "volume_30d_reported"
     IS_MARKET_CAP_INCLUDED = "is_market_cap_included_in_calc"
 
+class SortDir(Enum):
+	ASC = "asc"
+	DESC = "desc"
 
 class SortOption(Enum):
     MARKET_CAP = "market_cap"
@@ -114,14 +117,11 @@ class Market(object):
 			raise e
 
 
-	def listings_latest(self, sort_by: SortOption = SortOption.MARKET_CAP, sort_dir: str = 'desc', start: int = 1, limit: int = 100, convert: str = None, aux_fields: AuxFields = None, filters: FilterOptions = None) -> List[TokenState]:
+	def listings_latest(self, sort_by: SortOption = SortOption.MARKET_CAP, sort_dir: SortDir = SortDir.DESC, start: int = 1, limit: int = 100, convert: str = None, aux_fields: AuxFields = None, filters: FilterOptions = None) -> List[TokenState]:
 		
-		if sort_dir not in ['asc', 'desc']:
-			raise ValueError("sort_dir must be 'asc' or 'desc'")
-
 		params = {
 			'sort': sort_by.value,
-			'sort_dir': sort_dir,
+			'sort_dir': sort_dir.value,
 			'start': start,
 			'limit': limit
 		}
