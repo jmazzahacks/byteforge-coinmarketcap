@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict
+import time
 import datetime
 
 @dataclass
@@ -51,7 +52,9 @@ class TokenState:
     self_reported_circulating_supply: Optional[int]
     self_reported_market_cap: Optional[float]
     tvl_ratio: Optional[float]
+    timestamp: int = int(time.time())
     is_market_cap_included_in_calc: Optional[bool] = None
+
 
     @staticmethod
     def from_dict(data: Dict) -> 'TokenState':
