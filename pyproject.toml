@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "byteforge-coinmarketcap"
-version = "0.1.1"
+version = "0.1.2"
 description = "Python SDK for the coinmarketcap.com API."
 readme = "README.md"
 license = { file="LICENSE" }
