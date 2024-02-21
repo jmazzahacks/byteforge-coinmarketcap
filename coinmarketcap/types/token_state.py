@@ -51,7 +51,7 @@ class TokenState:
     self_reported_circulating_supply: Optional[int]
     self_reported_market_cap: Optional[float]
     tvl_ratio: Optional[float]
-    is_market_cap_included_in_calc: Optional[bool]
+    is_market_cap_included_in_calc: Optional[bool] = None
 
     @staticmethod
     def from_dict(data: Dict) -> 'TokenState':
