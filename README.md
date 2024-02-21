@@ -35,7 +35,7 @@ coinmarketcap = Market(api_key=API_KEY)
 Get the top 5 token states by market cap (A TokenState is a snapshot of a token at a certain point of time, for listings_latest, that time will always be "now")
 
 
-```
+```python
 token_states = coinmarketcap.listings_latest(sort_by=SortOption.MARKET_CAP, limit=5)
 
 for token in tokens:
