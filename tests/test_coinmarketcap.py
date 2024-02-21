@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from coinmarketcap import FilterOptions, SortOption, AuxFields, Market
+from coinmarketcap import FilterOptions, SortOption, AuxFields, SortDir, Market
 import os
 
 @pytest.fixture
@@ -42,7 +42,7 @@ def test_listings_latest(coinmarketcap_instance):
     # Make the API call
     tokens = coinmarketcap_instance.listings_latest(
         sort_by=SortOption.MARKET_CAP,
-        sort_dir='desc',
+        sort_dir=SortDir.DESC,
         convert="USD",
         limit=1,
         filters=filter,
