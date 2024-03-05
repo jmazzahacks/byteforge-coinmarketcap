@@ -53,22 +53,22 @@ class TokenState:
     id: int
     name: str
     symbol: str
-    slug: str
     last_updated: datetime.datetime
-    infinite_supply: bool
     quote: Dict[str, Quote]
-    num_market_pairs: Optional[int]
-    date_added: Optional[datetime.datetime]
-    tags: Optional[List[str]]
-    max_supply: Optional[int]
-    circulating_supply: Optional[int]
-    total_supply: Optional[float]
-    platform: Optional[str]
-    cmc_rank: Optional[int]
-    self_reported_circulating_supply: Optional[int]
-    self_reported_market_cap: Optional[float]
-    tvl_ratio: Optional[float]
     timestamp: int = int(time.time())
+    infinite_supply: bool = None
+    slug: Optional[str] = None
+    num_market_pairs: Optional[int] = None
+    date_added: Optional[datetime.datetime] = None
+    tags: Optional[List[str]] = None
+    max_supply: Optional[int] = None
+    circulating_supply: Optional[int] = None
+    total_supply: Optional[float] = None
+    platform: Optional[str] = None
+    cmc_rank: Optional[int] = None
+    self_reported_circulating_supply: Optional[int] = None
+    self_reported_market_cap: Optional[float] = None
+    tvl_ratio: Optional[float] = None
     is_market_cap_included_in_calc: Optional[bool] = None
 
 
@@ -79,8 +79,11 @@ class TokenState:
         # Convert 'is_market_cap_included_in_calc' from 0/1 to False/True
         if 'is_market_cap_included_in_calc' in data:
             data['is_market_cap_included_in_calc'] = bool(data['is_market_cap_included_in_calc'])
-            
-        data['quote'] = {currency: Quote.from_dict(currency, dct_quote_data) for currency, dct_quote_data in data['quote'].items()}
+
+        for currency, dct_quote_data in data['quote'].items():
+            data['quote'] = Quote.from_dict(currency, dct_quote_data)    
+
+        # data['quote'] = {currency: Quote.from_dict(currency, dct_quote_data) for currency, dct_quote_data in data['quote'].items()}
 
         # Set optional attributes to None if not present in the data
         optional_fields = [
