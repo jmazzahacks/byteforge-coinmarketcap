@@ -1,5 +1,6 @@
 import pytest
 from datetime import datetime
+from coinmarketcap.types.token_state import Quote
 from coinmarketcap import FilterOptions, SortOption, AuxFields, SortDir, Market
 import os
 
@@ -60,7 +61,7 @@ def test_listings_latest(coinmarketcap_instance):
     assert isinstance(token.symbol, str)
     assert isinstance(token.slug, str)
     assert isinstance(token.infinite_supply, bool)
-    assert isinstance(token.quote, dict)
+    assert isinstance(token.quote, Quote)
 
     # Check optional attributes (can be None)
     assert token.num_market_pairs is None or isinstance(token.num_market_pairs, int)

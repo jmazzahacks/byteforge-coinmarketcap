@@ -4,7 +4,7 @@ import json
 import requests
 import tempfile
 import requests_cache
-from .types.token_state import TokenState
+from .types.token_state import TokenState, Quote
 from typing import List, Optional
 from enum import Enum
 from dataclasses import dataclass
