@@ -137,6 +137,7 @@ class Market(object):
 
 			print(f"got back {ticker}")
 			for dct_ticker_data in response['data'][ticker]:
+
 				lst_quotes = dct_ticker_data['quotes']
 				id = dct_ticker_data['id']
 				name = dct_ticker_data['name']
@@ -154,6 +155,7 @@ class Market(object):
 						circulating_supply = dct_quote_data.pop('circulating_supply')
 
 					ts_quote = Quote.from_dict(base_currency, dct_quote_data)
+					
 					token_state = TokenState(
 						id=id, 
 						name=name, 
