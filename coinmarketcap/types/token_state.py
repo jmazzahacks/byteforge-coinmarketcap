@@ -40,12 +40,21 @@ class Quote:
 
     @staticmethod
     def from_dict(currency: str, dct_quote_data: Dict) -> 'Quote':
+        # Handle both 'last_updated' and 'timestamp' for the last_updated field
+        if 'last_updated' in dct_quote_data:
+            last_updated_str = dct_quote_data['last_updated']
+        elif 'timestamp' in dct_quote_data:
+            last_updated_str = dct_quote_data['timestamp']
+        else:
+            raise ValueError("Payload must contain either 'last_updated' or 'timestamp' field.")
+
+        # Remove both possible keys to avoid errors in the constructor
+        dct_quote_data.pop('last_updated', None)
+        dct_quote_data.pop('timestamp', None)
+
+        last_updated = datetime.datetime.fromisoformat(last_updated_str)
         
-        # Ensure to handle the 'last_updated' conversion properly here
-        data = {k: v for k, v in dct_quote_data.items() if k != 'last_updated'}
-        last_updated = datetime.datetime.fromisoformat(dct_quote_data.get('last_updated'))
-        
-        return Quote(base_currency=currency, last_updated=last_updated, **data)
+        return Quote(base_currency=currency, last_updated=last_updated, **dct_quote_data)
 
 
 @dataclass
@@ -55,6 +64,7 @@ class TokenState:
     symbol: str
     last_updated: datetime.datetime
     quote: Dict[str, Quote]
+
     timestamp: int = int(time.time())
     infinite_supply: bool = None
     slug: Optional[str] = None
@@ -70,6 +80,8 @@ class TokenState:
     self_reported_market_cap: Optional[float] = None
     tvl_ratio: Optional[float] = None
     is_market_cap_included_in_calc: Optional[bool] = None
+    is_active: Optional[bool] = None
+    is_fiat: Optional[bool] = None
 
 
     @staticmethod
@@ -82,8 +94,6 @@ class TokenState:
 
         for currency, dct_quote_data in data['quote'].items():
             data['quote'] = Quote.from_dict(currency, dct_quote_data)    
-
-        # data['quote'] = {currency: Quote.from_dict(currency, dct_quote_data) for currency, dct_quote_data in data['quote'].items()}
 
         # Set optional attributes to None if not present in the data
         optional_fields = [
