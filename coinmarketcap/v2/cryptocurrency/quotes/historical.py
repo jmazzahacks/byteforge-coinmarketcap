@@ -1,10 +1,9 @@
 
-from typing import List
+from typing import Optional, List
 
 from coinmarketcap.types.token_state import TokenState, Quote
 
-
-def validate_interval(interval: str) -> None:
+def _validate_interval(interval: str) -> None:
     # Define allowed calendar year and time constants
     calendar_intervals = {"hourly", "daily", "weekly", "monthly", "yearly"}
 
@@ -23,14 +22,16 @@ def validate_interval(interval: str) -> None:
 
 def _quotes_historical_v2(market, 
 						  ticker: str, 
-						  timestamp_start: int, 
-						  timestamp_end: int, 
+						  timestamp_start: Optional[int], 
+						  timestamp_end: Optional[int], 
 						  interval: str = '24h') -> List[TokenState]:
 
+	# Check if the start timestamp is greater than the end timestamp
 	if timestamp_start > timestamp_end:
 		raise ValueError('The start timestamp occurr before than the end timestamp')
 
-	validate_interval(interval)
+	# Check if the interval is valid
+	_validate_interval(interval)
 
 	params = {
 		'symbol': ticker,
