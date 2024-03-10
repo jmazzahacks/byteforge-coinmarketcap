@@ -1,8 +1,10 @@
 import pytest
 from datetime import datetime
-from coinmarketcap.types.token_state import Quote
-from coinmarketcap import FilterOptions, SortOption, AuxFields, SortDir, Market
 import os
+
+from coinmarketcap import Market
+from coinmarketcap.types.token_state import Quote
+from coinmarketcap.v1.cryptocurrency.listings.common import SortOption, AuxFields, SortDir, FilterOptions
 
 @pytest.fixture
 def coinmarketcap_instance():
