@@ -37,6 +37,8 @@ class Quote:
     volume_7d_reported: Optional[float] = None
     market_cap_by_total_supply: Optional[float] = None
     volume_7d: Optional[float] = None
+    total_supply: Optional[float] = None
+    circulating_supply: Optional[float] = None
 
     @staticmethod
     def from_dict(currency: str, dct_quote_data: Dict) -> 'Quote':
