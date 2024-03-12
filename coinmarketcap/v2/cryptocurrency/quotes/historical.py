@@ -1,5 +1,9 @@
 
 from typing import Optional, List
+import json
+from dateutil import parser
+import time
+from pprint import pprint
 
 from coinmarketcap.types.token_state import TokenState, Quote
 
@@ -23,8 +27,9 @@ def _validate_interval(interval: str) -> None:
 def _quotes_historical_v2(market, 
 						  ticker: str, 
 						  timestamp_start: Optional[int], 
-						  timestamp_end: Optional[int], 
-						  interval: str = '24h') -> List[TokenState]:
+						  timestamp_end: Optional[int],
+						  interval: str = 'hourly',
+						  convert: List[str] = ['USD']) -> List[TokenState]:
 
 	# Check if the start timestamp is greater than the end timestamp
 	if timestamp_start > timestamp_end:
@@ -33,52 +38,59 @@ def _quotes_historical_v2(market,
 	# Check if the interval is valid
 	_validate_interval(interval)
 
+	# validate convert
+	if (len(convert) > 3):
+		raise ValueError('The convert list must have a maximum of 3 elements')
+
 	params = {
 		'symbol': ticker,
 		'time_start': timestamp_start,
 		'time_end': timestamp_end,
-		'interval': interval
+		'interval': interval,
+		'convert': ','.join(convert)
 	}
 		
 	response = market._request('v2/cryptocurrency/quotes/historical', params=params)
 
 	lst_token_states = []
 
-	for ticker in response['data']:
+	# weird structure, we have to drill down into the quotes object for our ticker,
+	# we call this the quote summary because it's the quotes, plus some extra
+	# meta data we can extract for the TokenState object
+	dct_quote_summary = response['data'][ticker][0]
 
-		for dct_ticker_data in response['data'][ticker]:
+	# and we alos get some general meta-data that can go into the TokenState object
+	id = dct_quote_summary['id']
+	name = dct_quote_summary['name']
+	symbol = dct_quote_summary['symbol']
+	is_active = dct_quote_summary['is_active']
+	is_fiat = dct_quote_summary['is_fiat']
 
-			lst_quotes = dct_ticker_data['quotes']
-			id = dct_ticker_data['id']
-			name = dct_ticker_data['name']
-			symbol = dct_ticker_data['symbol']
-			is_active = dct_ticker_data['is_active']
-			is_fiat = dct_ticker_data['is_fiat']
-			total_supply = None
-			circulating_supply = None
+	# and the quotes themselves, still wrapped up in a list of convoluted stuff
+	lst_quotes = dct_quote_summary['quotes']
 
-			for quote in lst_quotes:
-				base_currency, dct_quote_data = quote['quote'].popitem()
-				if 'total_supply' in dct_quote_data:
-					total_supply = dct_quote_data.pop('total_supply')
-				if 'circulating_supply' in dct_quote_data:
-					circulating_supply = dct_quote_data.pop('circulating_supply')
+	# for each quote block, we can create a token state
+	for dct_quote_block in lst_quotes:
 
-				ts_quote = Quote.from_dict(base_currency, dct_quote_data)
+		# Parse the timestamp string into a datetime object
+		timestamp_dt = parser.parse(dct_quote_block['timestamp'])
+
+		# create a token state, the quotes are empty for now
+		token_state = TokenState(
+			id=id,
+			name=name,
+			symbol=symbol,
+			last_updated=timestamp_dt,
+			timestamp=int(timestamp_dt.timestamp()),
+			is_active=is_active,
+			quote={},
+			is_fiat=is_fiat)
+
+		# init each quote object and add it to the tokenstate
+		for base_currency, dct_quote_data in dct_quote_block['quote'].items():
+			quote = Quote.from_dict(base_currency, dct_quote_data)
+			token_state.quote[base_currency] = quote
 					
-				token_state = TokenState(
-					id=id, 
-					name=name, 
-					symbol=symbol, 
-					last_updated=ts_quote.last_updated, 
-					quote=ts_quote, 
-					circulating_supply=circulating_supply, 
-					total_supply=total_supply,
-					timestamp=int(ts_quote.last_updated.timestamp()),
-					is_active=is_active,
-					is_fiat=is_fiat)
-					
-				lst_token_states.append(token_state)
+		lst_token_states.append(token_state)
 
 	return lst_token_states
-

@@ -63,8 +63,14 @@ class Market(object):
 		except Exception as e:
 			raise e
 
-	def quotes_historical(self, ticker: str, timestamp_start: int, timestamp_end: int, interval: str = '24h') -> List[TokenState]:
-		return _quotes_historical_v2(self, ticker, timestamp_start, timestamp_end, interval)
+	def quotes_historical(self,
+					   ticker: str,
+					   timestamp_start: int,
+					   timestamp_end: int,
+					   interval: str = '24h',
+					   convert: List[str] = ['USD']) -> List[TokenState]:
+		
+		return _quotes_historical_v2(self, ticker, timestamp_start, timestamp_end, interval, convert)
 
 	def listings_latest(self, sort_by: SortOption = SortOption.MARKET_CAP, 
 					sort_dir: SortDir = SortDir.DESC, 
