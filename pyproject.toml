@@ -20,7 +20,8 @@ authors = [
 ]
 dependencies = [
   "requests",
-  "requests-cache"
+  "requests-cache",
+  "python-dateutil"
 ]
 
 [project.urls]
