@@ -46,7 +46,7 @@ def test_listings_latest(coinmarketcap_instance):
     tokens = coinmarketcap_instance.listings_latest(
         sort_by=SortOption.MARKET_CAP,
         sort_dir=SortDir.DESC,
-        convert="USD",
+        convert=['USD'],
         limit=1,
         filters=filter,
         aux_fields=aux_fields

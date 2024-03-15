@@ -76,7 +76,7 @@ class Market(object):
 					sort_dir: SortDir = SortDir.DESC, 
 					start: int = 1, 
 					limit: int = 100, 
-					convert: str = None, 
+					convert: List[str] = ['USD'],
 					aux_fields: AuxFields = None, 
 					filters: FilterOptions = None) -> List[TokenState]:
 		
