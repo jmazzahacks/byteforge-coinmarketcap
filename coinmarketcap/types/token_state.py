@@ -65,7 +65,7 @@ class TokenState:
     name: str
     symbol: str
     last_updated: datetime.datetime
-    quote: Dict[str, Quote]
+    quote_map: Dict[str, Quote]
 
     timestamp: int = int(time.time())
     infinite_supply: bool = None
@@ -94,8 +94,11 @@ class TokenState:
         if 'is_market_cap_included_in_calc' in data:
             data['is_market_cap_included_in_calc'] = bool(data['is_market_cap_included_in_calc'])
 
-        for currency, dct_quote_data in data['quote'].items():
-            data['quote'] = Quote.from_dict(currency, dct_quote_data)    
+        quote_map = {}
+        dct_quote_data = data.pop('quote')
+        for currency, dct_quote_data in dct_quote_data.items():
+            quote_map[currency] = Quote.from_dict(currency, dct_quote_data)
+        data['quote_map'] = quote_map
 
         # Set optional attributes to None if not present in the data
         optional_fields = [
@@ -103,6 +106,7 @@ class TokenState:
             'total_supply', 'platform', 'cmc_rank', 'self_reported_circulating_supply',
             'self_reported_market_cap', 'tvl_ratio'
         ]
+
         for attr_name in optional_fields:
             if attr_name not in data:
                 data[attr_name] = None

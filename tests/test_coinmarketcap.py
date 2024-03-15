@@ -63,7 +63,7 @@ def test_listings_latest(coinmarketcap_instance):
     assert isinstance(token.symbol, str)
     assert isinstance(token.slug, str)
     assert isinstance(token.infinite_supply, bool)
-    assert isinstance(token.quote, Quote)
+    assert isinstance(token.quote_map, dict)
 
     # Check optional attributes (can be None)
     assert token.num_market_pairs is None or isinstance(token.num_market_pairs, int)
