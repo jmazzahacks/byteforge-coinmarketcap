@@ -83,13 +83,13 @@ def _quotes_historical_v2(market,
 			last_updated=timestamp_dt,
 			timestamp=int(timestamp_dt.timestamp()),
 			is_active=is_active,
-			quote={},
+			quote_map={},
 			is_fiat=is_fiat)
 
 		# init each quote object and add it to the tokenstate
 		for base_currency, dct_quote_data in dct_quote_block['quote'].items():
 			quote = Quote.from_dict(base_currency, dct_quote_data)
-			token_state.quote[base_currency] = quote
+			token_state.quote_map[base_currency] = quote
 					
 		lst_token_states.append(token_state)
 
