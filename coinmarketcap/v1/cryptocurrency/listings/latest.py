@@ -8,7 +8,7 @@ def _listings_latest(market,
 					sort_dir: SortDir = SortDir.DESC, 
 					start: int = 1, 
 					limit: int = 100, 
-					convert: str = None, 
+					convert: List[str] = ['USD'],
 					aux_fields: AuxFields = None, 
 					filters: FilterOptions = None) -> List[TokenState]:
 		
@@ -18,9 +18,13 @@ def _listings_latest(market,
 		'start': start,
 		'limit': limit
 	}
+
+	# validate convert
+	if (len(convert) > 3):
+		raise ValueError('The convert list must have a maximum of 3 elements')
 		
 	if convert:
-		params['convert'] = convert
+		params['convert'] = ','.join(convert)
 
 	if aux_fields:
 		# Include the "aux" fields in the params
