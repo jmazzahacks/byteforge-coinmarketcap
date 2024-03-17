@@ -59,12 +59,12 @@ def _quotes_historical_v2(market,
 	# meta data we can extract for the TokenState object
 	dct_quote_summary = response['data'][ticker][0]
 
-	# and we alos get some general meta-data that can go into the TokenState object
+	# and we also get some general meta-data that can go into the TokenState object
 	id = dct_quote_summary['id']
 	name = dct_quote_summary['name']
 	symbol = dct_quote_summary['symbol']
-	is_active = dct_quote_summary['is_active']
-	is_fiat = dct_quote_summary['is_fiat']
+	is_active = dct_quote_summary['is_active'] == 1
+	is_fiat = dct_quote_summary['is_fiat'] == 1
 
 	# and the quotes themselves, still wrapped up in a list of convoluted stuff
 	lst_quotes = dct_quote_summary['quotes']
