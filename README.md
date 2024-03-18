@@ -1,8 +1,10 @@
 # About This Project
 
-This project is a fork of Martin Simon's 'coinmarketcap' module, which had not been updated for a while ([original repository](https://github.com/barnumbirr/coinmarketcap)). This version has been extensively reworked to be compatible with the latest CoinMarketCap API, diverging significantly from the original source. As a result, it is not backwards compatible, but it brings new capabilities and improvements tailored to the current API's structure and requirements.
+This project is a fork of Martin Simon's 'coinmarketcap' module, which had not been updated for a long while ([original repository](https://github.com/barnumbirr/coinmarketcap)). This version has been extensively reworked to be compatible with the current CoinMarketCap API, diverging significantly from the original source. As a result, it is not backwards compatible, but it brings new capabilities and improvements tailored to the current API's structure and requirements.
 
-As of now, the project only supports the `v1/cryptocurrency/listings/latest` endpoint which is usable by anyone with a a free API key from CoinMarketCap. Obtain your free API key by signing up at [CoinMarketCap API](https://pro.coinmarketcap.com/signup/). 
+This project currently supports the `v1/cryptocurrency/listings/latest` endpoint which is usable by anyone with a a free API key from CoinMarketCap. Obtain your free API key by signing up at [CoinMarketCap API](https://pro.coinmarketcap.com/signup/). 
+
+It also supports the `/v2/cryptocurrency/quotes/historical` endpoint which requires a paid 'Hobbyist' level account or higher.
 
 ## Prerequisites
 
@@ -16,11 +18,7 @@ Install byteforge-coinmarketcap
 pip install byteforge-coinmarketcap
 ```
 
-## Usage
-
-This section will guide you through the process of using the Market object to fetch the latest listings from CoinMarketCap.
-
-### Initialization
+## Initialization
 
 First, create an instance of the `Market` class with your API key:
 
@@ -32,23 +30,54 @@ API_KEY = 'your_api_key_here'
 coinmarketcap = Market(api_key=API_KEY)
 ```
 
+## General Instructions
+
+This SDK is crafted to fetch market data at specific points in time, offering a comprehensive snapshot of cryptocurrency metrics. Each method returns a list of `TokenState` objects, encapsulating detailed quotes for a cryptocurrency asset corresponding to particular timestamps. The `TokenState` object can include multiple quotes for the asset. For additional information, refer to the usage examples provided. 
+
+
+## Usage: API listings_latest
+
 Get the top 5 token states by market cap (A TokenState is a snapshot of a token at a certain point of time, for listings_latest, that time will always be "now")
 
+### Simple Usage
 
 ```python
 token_states = coinmarketcap.listings_latest(sort_by=SortOption.MARKET_CAP, limit=5)
 
 for token in tokens:
-    print(token.name, token.symbol, token.quote['USD'].price)
+    print(token.name, token.symbol, token.quote_map['USD'].price)
 
-Bitcoin BTC 51121.78037849647
-Ethereum ETH 2912.0337516792188
-Tether USDt USDT 0.9996898483447065
-BNB BNB 369.2725354702457
-Solana SOL 103.68827889524766
+# Bitcoin BTC 51121.78037849647
+# Ethereum ETH 2912.0337516792188
+# Tether USDt USDT 0.9996898483447065
+# BNB BNB 369.2725354702457
+# Solana SOL 103.68827889524766
+```
+### The `convert` parameter
+
+The `convert` parameter enhances your ability to receive cryptocurrency quotes in multiple currencies simultaneously. This feature is especially useful for comparing market values across different fiat and cryptocurrencies, allowing up to three currency conversions in a single request.
+
+Here's how you can retrieve the latest listings and obtain quotes in USD and BTC for the top 5 cryptocurrencies by market capitalization:
+
+```python
+# Fetch listings with market cap sort, limited to the top 5, converting quotes to USD and BTC
+tokens = coinmarketcap.listings_latest(sort_by=SortOption.MARKET_CAP, limit=5, convert=['USD', 'BTC'])
+
+# Iterate through each token to display its name, symbol, and quotes in BTC and USD
+for token in tokens:
+   btc_price = token.quote_map['BTC'].price
+   usd_price = token.quote_map['USD'].price
+   print(f"{token.name} ({token.symbol}): {btc_price} BTC | {usd_price} USD")
+
+# Example output:
+Bitcoin (BTC): 1 BTC | 67393.03455553834 USD
+Ethereum (ETH): 0.052078986669438124 BTC | 3509.760948230864 USD
+Tether USDt (USDT): 1.4836675143579e-05 BTC | 0.9998885606405162 USD
+Solana (SOL): 0.002940752776384911 BTC | 198.1862534782036 USD
+BNB (BNB): 0.008168244957149958 BTC | 550.4828146553089 USD
 ```
 
-## Sort Option Parameters
+### The `SortOption` parameter
 
 The `SortOption` enum provides various parameters you can use to sort the listings fetched from CoinMarketCap. Below are the available sort options:
 
@@ -79,7 +108,7 @@ from coinmarketcap import SortOption, SortDir
 tokens = coinmarketcap.listings_latest(sort_by=SortOption.PRICE, sort_dir=SortDir.DESC)
 ```
 
-## Using Filter Options
+### The `FilterOptions` parameter
 
 The `FilterOptions` class allows you to filter the listings by various criteria. Below are the fields you can set to apply filters:
 
@@ -110,10 +139,10 @@ filter_options = FilterOptions(
 tokens = coinmarketcap.listings_latest(filters=filter_options, limit=10)
 
 for token in tokens:
-    print(f"{token.name} - {token.symbol}: ${token.quote['USD'].price}")
+    print(f"{token.name} - {token.symbol}: ${token.quote_map['USD'].price}")
 ```
 
-## Using Auxiliary Fields
+### The `AuxFields` paramater
 
 The `AuxFields` enum allows you to specify additional fields to be included in the response data for each token listing. This can provide more detailed information about each token. Below are the auxiliary fields you can request:
 
@@ -156,6 +185,68 @@ tokens = coinmarketcap.listings_latest(
 for token in tokens:
     print(f"{token.name} ({token.symbol}) - CMC Rank: {token.cmc_rank}, Market Pairs: {token.num_market_pairs}")
 ```
+
+## Usage: API quotes_historical
+
+
+The `quotes_historical` method facilitates fetching historical quotes for a specific cryptocurrency over a given time range. This feature allows for detailed analysis of cryptocurrency value trends over time in different fiat or cryptocurrencies.
+
+This API requires a 'Hobbyist' or higher tier CMC subscription.
+
+### Example Usage
+
+```python
+from byteforge_coinmarketcap import Market
+from datetime import datetime
+
+market = Market(api_key='your_api_key')
+
+historical_quotes = coinmarketcap.quotes_historical(
+    ticker='BTC',
+    timestamp_start=1709269200,
+    timestamp_end=1710046800,
+    interval='daily',
+    convert=['USD', 'EUR']
+)
+
+for token_state in historical_quotes:
+    print(f"{token_state.name} ({token_state.symbol}) - Date: {datetime.fromtimestamp(token_state.timestamp)}")
+    for currency, quote in token_state.quote_map.items():
+        print(f"  {currency}: {quote.price}")
+        
+# Example output
+# Bitcoin (BTC) - Date: 2024-03-01 19:00:00
+#  EUR: 57565.10517077225
+#  USD: 62431.65248172238
+# Bitcoin (BTC) - Date: 2024-03-02 19:00:00
+#  EUR: 57196.216977007156
+#  USD: 62031.57852286433
+# Bitcoin (BTC) - Date: 2024-03-03 19:00:00
+#  EUR: 58233.4060759458
+#  USD: 63137.00468154272
+# Bitcoin (BTC) - Date: 2024-03-04 19:00:00
+#  EUR: 62964.80344823259
+#  USD: 68341.05778181224        
+```
+
+### Interval Parameter Options
+
+When fetching historical quotes, you can specify the `interval` parameter to determine the granularity of the time series data. There are two types of interval formats you can use:
+
+### Calendar Intervals (UTC Time)
+- `hourly`: Retrieves the first quote available at the beginning of each calendar hour.
+- `daily`: Retrieves the first quote available at the beginning of each calendar day.
+- `weekly`: Retrieves the first quote available at the beginning of each calendar week.
+- `monthly`: Retrieves the first quote available at the beginning of each calendar month.
+- `yearly`: Retrieves the first quote available at the beginning of each calendar year.
+
+### Relative Time Intervals
+- `m`: Retrieves a quote available every "m" minutes. Supported intervals: `5m`, `10m`, `15m`, `30m`, `45m`.
+- `h`: Retrieves a quote available every "h" hours. Supported intervals: `1h`, `2h`, `3h`, `4h`, `6h`, `12h`.
+- `d`: Retrieves a quote available every "d" days. Supported intervals: `1d`, `2d`, `3d`, `7d`, `14d`, `15d`, `30d`, `60d`, `90d`, `365d`.
+
+Please ensure to select the interval that best matches your data analysis needs.
+
 
 
 ## License:
