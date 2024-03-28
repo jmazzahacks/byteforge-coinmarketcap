@@ -6,4 +6,5 @@ bin
 pyvenv.cfg
 .vscode
 main.py
+build_publish.sh
 dist
