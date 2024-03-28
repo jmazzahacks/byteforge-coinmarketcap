@@ -7,6 +7,7 @@ import json
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 import datetime
+from dateutil import parser
 
 from dataclasses import dataclass
 from typing import Optional
@@ -54,7 +55,7 @@ class Quote:
         dct_quote_data.pop('last_updated', None)
         dct_quote_data.pop('timestamp', None)
 
-        last_updated = datetime.datetime.fromisoformat(last_updated_str)
+        last_updated = parser.parse(last_updated_str)
         
         return Quote(base_currency=currency, last_updated=last_updated, **dct_quote_data)
 
