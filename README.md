@@ -57,6 +57,8 @@ for token in tokens:
 
 The `convert` parameter enhances your ability to receive cryptocurrency quotes in multiple currencies simultaneously. This feature is especially useful for comparing market values across different fiat and cryptocurrencies, allowing up to three currency conversions in a single request.
 
+**Please Note:** You’ll need a hobbyist account or higher to do more than one conversion at a time.
+
 Here's how you can retrieve the latest listings and obtain quotes in USD and BTC for the top 5 cryptocurrencies by market capitalization:
 
 ```python
