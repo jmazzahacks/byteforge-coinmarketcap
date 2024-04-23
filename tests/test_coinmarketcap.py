@@ -15,7 +15,57 @@ def coinmarketcap_instance():
     yield coinmarketcap_instance
 
 
-def test_cryptocurrency_quotes_historical(coinmarketcap_instance):
+def test_cryptocurrency_quotes_historical_with_id(coinmarketcap_instance):
+
+    timestamp_now = int(time.time())
+    timestamp_1_day_ago = timestamp_now - 60*60*24
+
+    # Make the API call
+    token_states = coinmarketcap_instance.quotes_historical(
+        id="1",
+        timestamp_start=timestamp_1_day_ago,
+        timestamp_end=timestamp_now,
+        interval='1h',
+        convert=['USD', 'BTC']
+    )
+
+    # Check if the response is a list and contains at least one item
+    assert isinstance(token_states, list)
+    assert len(token_states) >= 1
+
+    # Check the attributes of the first token state
+    token_state = token_states[0]
+    assert isinstance(token_state.id, int)
+    assert isinstance(token_state.name, str)
+    assert isinstance(token_state.symbol, str)
+    assert isinstance(token_state.last_updated, datetime)
+    assert isinstance(token_state.timestamp, int)
+    assert isinstance(token_state.is_active, bool)
+    assert isinstance(token_state.is_fiat, bool)
+    assert isinstance(token_state.quote_map, dict)
+
+    # Check the attributes of the USD quote
+    quote = token_state.quote_map['USD']
+    assert isinstance(quote.price, float)
+    assert isinstance(quote.volume_24h, float)
+    assert isinstance(quote.percent_change_1h, float)
+    assert isinstance(quote.percent_change_24h, float)
+    assert isinstance(quote.percent_change_7d, float)
+    assert isinstance(quote.market_cap, float)
+    assert isinstance(quote.last_updated, datetime)
+
+    # Check the attributes of the BTC quote
+    quote = token_state.quote_map['BTC']
+    assert isinstance(quote.price, float)
+    assert isinstance(quote.volume_24h, float)
+    assert isinstance(quote.percent_change_1h, float)
+    assert isinstance(quote.percent_change_24h, float)
+    assert isinstance(quote.percent_change_7d, float)
+    assert isinstance(quote.market_cap, float)
+    assert isinstance(quote.last_updated, datetime)
+
+
+def test_cryptocurrency_quotes_historical_with_ticker(coinmarketcap_instance):
     
     timestamp_now = int(time.time())
     timestamp_1_day_ago = timestamp_now - 60*60*24

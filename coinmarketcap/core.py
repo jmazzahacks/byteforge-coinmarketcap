@@ -3,8 +3,9 @@ import sys
 import json
 import requests
 import tempfile
+import time
 import requests_cache
-from typing import List
+from typing import Optional, List
 
 from .types.token_state import TokenState, Quote
 from .v2.cryptocurrency.quotes.historical import _quotes_historical_v2
@@ -64,13 +65,20 @@ class Market(object):
 			raise e
 
 	def quotes_historical(self,
-					   ticker: str,
-					   timestamp_start: int,
-					   timestamp_end: int,
-					   interval: str = '24h',
-					   convert: List[str] = ['USD']) -> List[TokenState]:
+						  id: Optional[int] = None,
+						  ticker: Optional[str] = None,
+						  timestamp_start: Optional[int] = int(time.time()) - 60*60*24,
+						  timestamp_end: Optional[int] = int(time.time()),
+						  interval: str = 'hourly',
+						  convert: List[str] = ['USD']) -> List[TokenState]:
 		
-		return _quotes_historical_v2(self, ticker, timestamp_start, timestamp_end, interval, convert)
+		return _quotes_historical_v2(self,
+							   id=id,
+							   ticker=ticker,
+							   timestamp_start=timestamp_start,
+							   timestamp_end=timestamp_end,
+							   interval=interval,
+							   convert=convert)
 
 	def listings_latest(self, sort_by: SortOption = SortOption.MARKET_CAP, 
 					sort_dir: SortDir = SortDir.DESC, 

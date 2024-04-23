@@ -23,13 +23,16 @@ def _validate_interval(interval: str) -> None:
         # If not, raise a ValueError with a message about the invalid interval
         raise ValueError(f"Invalid interval: '{interval}'. Please provide a valid interval.")
 
-
-def _quotes_historical_v2(market, 
-						  ticker: str, 
-						  timestamp_start: Optional[int], 
-						  timestamp_end: Optional[int],
+def _quotes_historical_v2(market,
+						  id: Optional[int] = None,
+						  ticker: Optional[str] = None,
+						  timestamp_start: Optional[int] = int(time.time()) - 60*60*24,
+						  timestamp_end: Optional[int] = int(time.time()),
 						  interval: str = 'hourly',
 						  convert: List[str] = ['USD']) -> List[TokenState]:
+
+	if not id and not ticker:
+		raise ValueError('Either id or ticker must be provided')
 
 	# Check if the start timestamp is greater than the end timestamp
 	if timestamp_start > timestamp_end:
@@ -43,21 +46,32 @@ def _quotes_historical_v2(market,
 		raise ValueError('The convert list must have a maximum of 3 elements')
 
 	params = {
-		'symbol': ticker,
 		'time_start': timestamp_start,
 		'time_end': timestamp_end,
 		'interval': interval,
 		'convert': ','.join(convert)
 	}
+
+	# use id if provided, otherwise use ticker
+	if id:
+		params['id'] = id
+	else:
+		params['symbol'] = ticker
 		
 	response = market._request('v2/cryptocurrency/quotes/historical', params=params)
 
 	lst_token_states = []
 
-	# weird structure, we have to drill down into the quotes object for our ticker,
-	# we call this the quote summary because it's the quotes, plus some extra
-	# meta data we can extract for the TokenState object
-	dct_quote_summary = response['data'][ticker][0]
+	if id:
+		# if we are querying by id, we get a simpler (although not completely simple)
+		# structure to parse
+		dct_quote_summary = response['data']
+	else:
+		# if we query by ticker we get a differeint weird structure, we have to 
+		# drill down into the quotes object for our ticker, we call this the quote 
+	    # summary because it's the quotes, plus some extra
+		# meta data we can extract for the TokenState object
+		dct_quote_summary = response['data'][ticker][0]
 
 	# and we also get some general meta-data that can go into the TokenState object
 	id = dct_quote_summary['id']
