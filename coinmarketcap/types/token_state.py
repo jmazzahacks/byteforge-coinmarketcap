@@ -43,6 +43,12 @@ class Quote:
 
     @staticmethod
     def from_dict(currency: str, dct_quote_data: Dict) -> 'Quote':
+
+        # insure integers are handled as floats (so 1 becomes 1.0)
+        dct_quote_data['price'] = float(dct_quote_data['price'])
+        dct_quote_data['market_cap'] = float(dct_quote_data['market_cap'])
+
+
         # Handle both 'last_updated' and 'timestamp' for the last_updated field
         if 'last_updated' in dct_quote_data:
             last_updated_str = dct_quote_data['last_updated']
