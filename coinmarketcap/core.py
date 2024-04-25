@@ -65,7 +65,7 @@ class Market(object):
 			raise e
 
 	def quotes_historical(self,
-						  id: Optional[int] = None,
+						  id: Optional[str] = None,
 						  ticker: Optional[str] = None,
 						  timestamp_start: Optional[int] = int(time.time()) - 60*60*24,
 						  timestamp_end: Optional[int] = int(time.time()),
