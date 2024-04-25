@@ -191,7 +191,7 @@ for token in tokens:
 ## Usage: API quotes_historical
 
 
-The `quotes_historical` method facilitates fetching historical quotes for a specific cryptocurrency over a given time range. This feature allows for detailed analysis of cryptocurrency value trends over time in different fiat or cryptocurrencies.
+The `quotes_historical` method facilitates fetching historical quotes for a specific cryptocurrency over a given time range. This feature allows for detailed analysis of cryptocurrency value trends over time in different fiat or cryptocurrencies.  You can query either directly by ticker using the ```ticker``` paramater or using the ```id``` parameter and supply the coinmarketcap id (cmc_id).  Using the cmd_id can avoid edge cases when multiple assets share the same ticker.
 
 This API requires a 'Hobbyist' or higher tier CMC subscription.
 
