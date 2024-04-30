@@ -11,6 +11,8 @@ from .types.token_state import TokenState, Quote
 from .v2.cryptocurrency.quotes.historical import _quotes_historical_v2
 from .v1.cryptocurrency.listings.latest import _listings_latest
 from .v1.cryptocurrency.listings.common import SortOption, AuxFields, SortDir, FilterOptions
+from .v1.key.info import _key_info
+from .v1.key.info import _calls_left_today
 
 class Market(object):
 
@@ -89,23 +91,21 @@ class Market(object):
 					filters: FilterOptions = None) -> List[TokenState]:
 		
 		return _listings_latest(self, sort_by, sort_dir, start, limit, convert, aux_fields, filters)
+	
 
-
-	# TODO - this should call global metrics endpoint
-	def stats(self, **kwargs):
+	def calls_left_today(self):
 		"""
-		This endpoint displays the global data found at the top of coinmarketcap.com.
+		Calculates how many API calls are left for today, based on the service plan's monthly call limit.
 
-		Optional parameters:
-		(string) convert - return pricing info in terms of another currency.
-		Valid fiat currency values are: "AUD", "BRL", "CAD", "CHF", "CLP", "CNY", "CZK",
-		"DKK", "EUR", "GBP", "HKD", "HUF", "IDR", "ILS", "INR", "JPY", "KRW", "MXN",
-		"MYR", "NOK", "NZD", "PHP", "PKR", "PLN", "RUB", "SEK", "SGD", "THB", "TRY",
-		"TWD", "ZAR"
-		Valid cryptocurrency values are: "BTC", "ETH" "XRP", "LTC", and "BCH"
-		"""
+		This function takes the user's API call limit and subtracts the number of calls used to date,
+		providing a simple ratio to estimate daily available calls until the reset date. Note that 
+		this is an approximation based on equal usage each day until the reset.
 
-		params = {}
-		params.update(kwargs)
-		response = self._request('global/', params)
-		return response
+		Parameters:
+			market (Market): An instance of the Market class, which handles the API communications.
+
+		Returns:
+			int: Approximate number of API calls left for the current day, based on daily usage 
+				till the reset date and a monthly limit.
+		"""		
+		return _calls_left_today(self)
