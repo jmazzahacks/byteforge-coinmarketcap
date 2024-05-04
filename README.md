@@ -250,6 +250,31 @@ When fetching historical quotes, you can specify the `interval` parameter to det
 Please ensure to select the interval that best matches your data analysis needs.
 
 
+To include the new `calls_left_today` routine in your existing project documentation, add a section that explains its purpose, usage, and example code on how to call it. Below is a suggested format for including this information in your README:
+
+## Monitoring API Usage
+
+As you utilize the API, it's important to manage the number of requests to stay within your plan's limits. The `calls_left_today` function provides an easy way to monitor your daily API usage against your monthly limits.
+
+### Purpose
+
+The `calls_left_today` method estimates the number of API calls you can still make for the current day without exceeding your monthly limit. This is crucial for applications that need to manage request rates or distribute API calls evenly throughout a billing period.
+
+### Usage
+
+2. **Call the `calls_left_today` Method**:
+   Use the `calls_left_today` method to find out how many more API calls you can make today.
+
+```python
+remaining_calls = market.calls_left_today()
+print(f"You have {remaining_calls} API calls left for today.")
+```
+
+### Note
+
+- **Accuracy**: Please note that this function provides an approximation. If your daily API call volume varies significantly, consider implementing more detailed tracking mechanisms.
+- **Reset Timing**: Be aware of your API subscription details, especially when the monthly call count resets, as this will affect the calculations.
+
 
 ## License:
 
