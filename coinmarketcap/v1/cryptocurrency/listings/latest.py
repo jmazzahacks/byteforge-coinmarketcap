@@ -55,7 +55,7 @@ def _listings_latest(market,
 		if filters.tags:
 			params['tag'] = ','.join(filters.tags)
 
-	response = market._request('v1/cryptocurrency/listings/latest', params=params)
+	response = market._request('v1/cryptocurrency/listings/latest', params=params, no_cache=True)
 	token_states = [TokenState.from_dict(token) for token in response['data']]
 
 	return token_states
