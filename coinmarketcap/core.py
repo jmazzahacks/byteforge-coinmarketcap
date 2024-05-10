@@ -17,6 +17,7 @@ from .v1.key.info import _calls_left_today
 class Market(object):
 
 	_session = None
+	_caching_session = None
 	_debug_mode = False
 	_api_key = None
 	__DEFAULT_BASE_URL = 'https://pro-api.coinmarketcap.com/'
@@ -33,30 +34,53 @@ class Market(object):
 		if not self._api_key:
 			raise ValueError('An API key is required for using the coinmarketcap API. Please visit https://pro.coinmarketcap.com/signup/ for more information.')
 
+	@property
+	def caching_session(self):
+		if not self._caching_session:
+			# define a a session with caching
+			self._caching_session = requests_cache.CachedSession(
+			 	cache_name=self.cache_name,
+			 	backend='sqlite', 
+			 	expire_after=120)
+			
+			self._caching_session.headers.update({
+					'Accept': 'application/json',
+				  	'X-CMC_PRO_API_KEY': self._api_key,
+				})
+
+		return self._caching_session
 
 	@property
 	def session(self):
 		if not self._session:
-			self._session = requests_cache.CachedSession(cache_name=self.cache_name, backend='sqlite', expire_after=120)
+		
+			# and a normal (non-caching) session
+			self._session = requests.Session()
+
 			self._session.headers.update({
 					'Accept': 'application/json',
 				  	'X-CMC_PRO_API_KEY': self._api_key,
 				})
+			
 		return self._session
 	
 
-	def _request(self, endpoint, params = {}):
+	def _request(self, endpoint, params = {}, no_cache = False):
 		if self._debug_mode:
 			print('Request URL: ' + self.base_url + endpoint)
 			if params:
 				print("Request Payload:\n" + json.dumps(params, indent=4))
 
 		try:
-			response_object = self.session.get(self.base_url + endpoint, params = params, timeout = self.request_timeout)
+			if no_cache:
+				response_object = self.session.get(self.base_url + endpoint, params=params, timeout=self.request_timeout)
+			else:
+				response_object = self.caching_session.get(self.base_url + endpoint, params=params, timeout=self.request_timeout)
 			
 			if self._debug_mode:
 				print('Response Code: ' + str(response_object.status_code))
-				print('From Cache?: ' + str(response_object.from_cache))
+				if hasattr(response_object, 'from_cache'):
+					print('From Cache?: ' + str(response_object.from_cache))
 				print("Response Payload:\n" + json.dumps(response_object.json(), indent=4))
 
 			if response_object.status_code == requests.codes.ok:
