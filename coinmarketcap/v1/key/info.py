@@ -18,32 +18,31 @@ def _key_info(market):
     return dct_response['data']
 
 
-def _calls_left_today(market):
+def _safe_daily_call_limit(market):
     """
-    Calculates how many API calls are left for today, based on the service plan's monthly call limit.
+    Calculates the safe number of API calls that can be made per day, based on the remaining quota and time until the reset.
 
-    This function takes the user's API call limit and subtracts the number of calls used to date,
-    providing a simple ratio to estimate daily available calls until the reset date. Note that 
-    this is an approximation based on equal usage each day until the reset.
+    This function estimates the daily call limit by dividing the remaining quota by the number of days left until the quota reset.
+    The estimation is based on equal usage allocation each day until the reset date.
 
     Parameters:
         market (Market): An instance of the Market class, which handles the API communications.
 
     Returns:
-        int: Approximate number of API calls left for the current day, based on daily usage 
-             till the reset date and a monthly limit.
+        int: Approximate number of API calls that can be safely made per day, based on remaining monthly quota
+             and days until the quota reset.
     """
     dct_response = market._request('v1/key/info', no_cache=True)
     quota_reset_dt = parser.parse(dct_response['data']['plan']['credit_limit_monthly_reset_timestamp'])
     monthly_calls_remaining = dct_response['data']['usage']['current_month']['credits_left']
-    
-    # Ensure the current datetime is timezone-aware with UTC timezone  
+
+    # Ensure the current datetime is timezone-aware with UTC timezone
     now_datetime = datetime.now(timezone.utc)
 
-    # Calculate the timedelta  
+    # Calculate the timedelta
     time_difference = quota_reset_dt - now_datetime
 
-    # Extract the number of days as an integer  
+    # Extract the number of days as an integer
     number_of_days = time_difference.days
 
     # Convert daily calls calculation into an integer
