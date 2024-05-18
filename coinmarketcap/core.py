@@ -12,7 +12,7 @@ from .v2.cryptocurrency.quotes.historical import _quotes_historical_v2
 from .v1.cryptocurrency.listings.latest import _listings_latest
 from .v1.cryptocurrency.listings.common import SortOption, AuxFields, SortDir, FilterOptions
 from .v1.key.info import _key_info
-from .v1.key.info import _calls_left_today
+from .v1.key.info import _safe_daily_call_limit
 
 class Market(object):
 
@@ -117,7 +117,7 @@ class Market(object):
 		return _listings_latest(self, sort_by, sort_dir, start, limit, convert, aux_fields, filters)
 	
 
-	def calls_left_today(self):
+	def safe_daily_call_limit(self):
 		"""
 		Calculates how many API calls are left for today, based on the service plan's monthly call limit.
 
@@ -132,4 +132,4 @@ class Market(object):
 			int: Approximate number of API calls left for the current day, based on daily usage 
 				till the reset date and a monthly limit.
 		"""		
-		return _calls_left_today(self)
+		return _safe_daily_call_limit(self)
