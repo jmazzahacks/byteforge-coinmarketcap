@@ -201,7 +201,7 @@ This API requires a 'Hobbyist' or higher tier CMC subscription.
 from byteforge_coinmarketcap import Market
 from datetime import datetime
 
-market = Market(api_key='your_api_key')
+coinmarketcap = Market(api_key='your_api_key')
 
 historical_quotes = coinmarketcap.quotes_historical(
     ticker='BTC',
@@ -254,20 +254,20 @@ To include the new `calls_left_today` routine in your existing project documenta
 
 ## Monitoring API Usage
 
-As you utilize the API, it's important to manage the number of requests to stay within your plan's limits. The `calls_left_today` function provides an easy way to monitor your daily API usage against your monthly limits.
+As you utilize the API, it's important to manage the number of requests to stay within your plan's limits. The `safe_daily_call_limit` function provides an easy way to verify your daily API limits against your monthly call budget.
 
 ### Purpose
 
-The `calls_left_today` method estimates the number of API calls you can still make for the current day without exceeding your monthly limit. This is crucial for applications that need to manage request rates or distribute API calls evenly throughout a billing period.
+The `safe_daily_call_limit` method estimates the number of API calls you can make during the current day without exceeding your monthly limit. This is crucial for applications that need to manage request rates or distribute API calls evenly throughout a billing period.
 
 ### Usage
 
-2. **Call the `calls_left_today` Method**:
-   Use the `calls_left_today` method to find out how many more API calls you can make today.
+2. **Call the `safe_daily_call_limit` Method**:
+   Use the `safe_daily_call_limit` method to find out how many API calls you can safely make per day without exhausting your quota.  It's up to you to store a counter for this and track your daily usage.  The SDK call is stateless and just uses some simple math to determine this value.
 
 ```python
-remaining_calls = market.calls_left_today()
-print(f"You have {remaining_calls} API calls left for today.")
+safe_calls_per_day = coinmarkectap.safe_daily_call_limit()
+print(f"You can safely make {safe_calls_per_day} calls per day.")
 ```
 
 ### Note
