@@ -14,6 +14,13 @@ from .v1.cryptocurrency.listings.common import SortOption, AuxFields, SortDir, F
 from .v1.key.info import _key_info
 from .v1.key.info import _safe_daily_call_limit
 
+class ServerException(Exception):
+    def __init__(self, status_code, message):
+        self.status_code = status_code
+        self.message = message
+        super().__init__(f"Server returned {status_code} - {message}")
+
+
 class Market(object):
 
 	_session = None
@@ -86,7 +93,7 @@ class Market(object):
 			if response_object.status_code == requests.codes.ok:
 				return response_object.json()
 			else:
-				raise Exception(f"Server returned {response_object.status_code} - {response_object.text}")
+				raise ServerException(response_object.status_code, response_object.text)
 		except Exception as e:
 			raise e
 
