@@ -30,6 +30,12 @@ API_KEY = 'your_api_key_here'
 coinmarketcap = Market(api_key=API_KEY)
 ```
 
+CMC's API has rate limits, and will throttle you if you exceed them, if you know what your rate limit is (and you should!) you can initialize the engine with the appropriate value as follows.
+
+```python
+coinmarketcap = Market(api_key=API_KEY, rate_limit_per_minute=30)
+```
+
 ## General Instructions
 
 This SDK is crafted to fetch market data at specific points in time, offering a comprehensive snapshot of cryptocurrency metrics. Each method returns a list of `TokenState` objects, encapsulating detailed quotes for a cryptocurrency asset corresponding to particular timestamps. The `TokenState` object can include multiple quotes for the asset. For additional information, refer to the usage examples provided. 
