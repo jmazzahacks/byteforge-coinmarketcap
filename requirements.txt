@@ -2,3 +2,4 @@ requests
 requests-cache
 pytest
 python-dateutil
+requests-ratelimiter

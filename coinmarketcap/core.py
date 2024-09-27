@@ -7,6 +7,8 @@ import time
 import requests_cache
 from typing import Optional, List
 
+from requests_ratelimiter import LimiterAdapter
+
 from .types.token_state import TokenState, Quote
 from .v2.cryptocurrency.quotes.historical import _quotes_historical_v2
 from .v1.cryptocurrency.listings.latest import _listings_latest
@@ -27,19 +29,30 @@ class Market(object):
 	_caching_session = None
 	_debug_mode = False
 	_api_key = None
+	_limiter = None
 	__DEFAULT_BASE_URL = 'https://pro-api.coinmarketcap.com/'
 	__DEFAULT_TIMEOUT = 30
 	__TEMPDIR_CACHE = True
 
-	def __init__(self, api_key = None, base_url = __DEFAULT_BASE_URL, request_timeout = __DEFAULT_TIMEOUT, tempdir_cache = __TEMPDIR_CACHE, debug_mode = False):
+	def __init__(self, api_key = None, 
+			  base_url = __DEFAULT_BASE_URL, 
+			  request_timeout = __DEFAULT_TIMEOUT, 
+			  tempdir_cache = __TEMPDIR_CACHE,
+			  rate_limit_per_second = -1,
+			  debug_mode = False):
+		
 		self._api_key = api_key
 		self.base_url = base_url
 		self.request_timeout = request_timeout
 		self._debug_mode = debug_mode
 		self.cache_filename = 'coinmarketcap_cache'
 		self.cache_name = os.path.join(tempfile.gettempdir(), self.cache_filename) if tempdir_cache else self.cache_filename
+		
 		if not self._api_key:
 			raise ValueError('An API key is required for using the coinmarketcap API. Please visit https://pro.coinmarketcap.com/signup/ for more information.')
+		
+		if rate_limit_per_second > 0:
+			self._limiter = LimiterAdapter(per_second=rate_limit_per_second)
 
 	@property
 	def caching_session(self):
@@ -49,6 +62,9 @@ class Market(object):
 			 	cache_name=self.cache_name,
 			 	backend='sqlite', 
 			 	expire_after=120)
+			
+			if self._limiter:
+				self._caching_session.mount('https://', self._limiter)
 			
 			self._caching_session.headers.update({
 					'Accept': 'application/json',
@@ -68,6 +84,9 @@ class Market(object):
 					'Accept': 'application/json',
 				  	'X-CMC_PRO_API_KEY': self._api_key,
 				})
+			
+			if self._limiter:
+				self._session.mount('https://', self._limiter)
 			
 		return self._session
 	
