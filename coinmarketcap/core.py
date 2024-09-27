@@ -38,7 +38,7 @@ class Market(object):
 			  base_url = __DEFAULT_BASE_URL, 
 			  request_timeout = __DEFAULT_TIMEOUT, 
 			  tempdir_cache = __TEMPDIR_CACHE,
-			  rate_limit_per_second = -1,
+			  rate_limit_per_minute = -1,
 			  debug_mode = False):
 		
 		self._api_key = api_key
@@ -51,8 +51,8 @@ class Market(object):
 		if not self._api_key:
 			raise ValueError('An API key is required for using the coinmarketcap API. Please visit https://pro.coinmarketcap.com/signup/ for more information.')
 		
-		if rate_limit_per_second > 0:
-			self._limiter = LimiterAdapter(per_second=rate_limit_per_second)
+		if rate_limit_per_minute > 0:
+			self._limiter = LimiterAdapter(per_minute=rate_limit_per_minute)
 
 	@property
 	def caching_session(self):
