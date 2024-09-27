@@ -30,7 +30,7 @@ API_KEY = 'your_api_key_here'
 coinmarketcap = Market(api_key=API_KEY)
 ```
 
-CMC's API has rate limits, and will throttle you if you exceed them, if you know what your rate limit is (and you should!) you can initialize the engine with the appropriate value as follows.
+CMC's API has rate limits, and will throttle you if you exceed them. If you know what your rate limit is (and you should!) you can initialize the engine with the appropriate value as follows.
 
 ```python
 coinmarketcap = Market(api_key=API_KEY, rate_limit_per_minute=30)
