@@ -44,6 +44,11 @@ class Quote:
     @staticmethod
     def from_dict(currency: str, dct_quote_data: Dict) -> 'Quote':
 
+
+        if 'price' not in dct_quote_data:
+            print(f"Payload: {json.dumps(dct_quote_data, indent=4)}")
+            raise ValueError("Payload must contain 'price' field.")
+
         # insure integers are handled as floats (so 1 becomes 1.0)
         dct_quote_data['price'] = float(dct_quote_data['price'])
         dct_quote_data['market_cap'] = float(dct_quote_data['market_cap'])
