@@ -17,7 +17,8 @@ authors = [
 dependencies = [
   "requests",
   "requests-cache",
-  "python-dateutil"
+  "python-dateutil",
+  "requests-ratelimiter"
 ]
 
 [build-system]
