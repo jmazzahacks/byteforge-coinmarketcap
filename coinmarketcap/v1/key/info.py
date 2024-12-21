@@ -43,7 +43,7 @@ def _safe_daily_call_limit(market):
     time_difference = quota_reset_dt - now_datetime
 
     # Extract the number of days as an integer
-    number_of_days = time_difference.days
+    number_of_days = time_difference.days + 1
 
     # Convert daily calls calculation into an integer
     return int(monthly_calls_remaining / number_of_days) if number_of_days > 0 else 0  # Added safety for division
