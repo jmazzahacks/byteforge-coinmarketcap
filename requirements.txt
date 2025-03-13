@@ -3,3 +3,5 @@ requests-cache
 pytest
 python-dateutil
 requests-ratelimiter
+build
+twine
