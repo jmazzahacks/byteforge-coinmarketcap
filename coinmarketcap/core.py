@@ -11,6 +11,7 @@ from requests_ratelimiter import LimiterAdapter
 
 from .types.token_state import TokenState, Quote
 from .v2.cryptocurrency.quotes.historical import _quotes_historical_v2
+from .v3.cryptocurrency.quotes.historical_v3 import _quotes_historical_v3
 from .v1.cryptocurrency.listings.latest import _listings_latest
 from .v1.cryptocurrency.listings.common import SortOption, AuxFields, SortDir, FilterOptions
 from .v1.key.info import _key_info
@@ -125,6 +126,23 @@ class Market(object):
 						  convert: List[str] = ['USD']) -> List[TokenState]:
 		
 		return _quotes_historical_v2(self,
+							   id=id,
+							   ticker=ticker,
+							   timestamp_start=timestamp_start,
+							   timestamp_end=timestamp_end,
+							   interval=interval,
+							   convert=convert)
+	
+	
+	def quotes_historical_v3(self,
+						  id: Optional[str] = None,
+						  ticker: Optional[str] = None,
+						  timestamp_start: Optional[int] = int(time.time()) - 60*60*24,
+						  timestamp_end: Optional[int] = int(time.time()),
+						  interval: str = 'hourly',
+						  convert: List[str] = ['USD']) -> List[TokenState]:
+		
+		return _quotes_historical_v3(self,
 							   id=id,
 							   ticker=ticker,
 							   timestamp_start=timestamp_start,
