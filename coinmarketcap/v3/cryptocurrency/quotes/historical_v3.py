@@ -3,7 +3,6 @@ import time
 from datetime import datetime
 from dateutil import parser
 from coinmarketcap.types.token_state import TokenState, Quote
-from coinmarketcap import Market
 from coinmarketcap.v1.cryptocurrency.listings.common import _validate_interval
 
 def _quotes_historical_v3(market,
