@@ -56,3 +56,30 @@ class SortOption(Enum):
     PERCENT_CHANGE_24H = "percent_change_24h"
     PERCENT_CHANGE_7D = "percent_change_7d"
 
+def _validate_interval(interval: str) -> None:
+    """
+    Validates that the given interval string is a supported time interval format.
+    
+    Parameters:
+        interval (str): The time interval to validate. Must be one of the supported calendar 
+                        intervals ('hourly', 'daily', 'weekly', 'monthly', 'yearly') or 
+                        relative time intervals (e.g., '5m', '1h', '1d', etc.).
+    
+    Raises:
+        ValueError: If the provided interval is not in the list of supported formats.
+    """
+    # Define allowed calendar year and time constants
+    calendar_intervals = {"hourly", "daily", "weekly", "monthly", "yearly"}
+
+    # Define allowed relative time intervals
+    relative_intervals = {
+        "5m", "10m", "15m", "30m", "45m",
+        "1h", "2h", "3h", "4h", "6h", "12h",
+        "1d", "2d", "3d", "7d", "14d", "15d", "30d", "60d", "90d", "365d"
+    }
+
+    # Check if the interval is in one of the allowed sets
+    if interval not in calendar_intervals and interval not in relative_intervals:
+        # If not, raise a ValueError with a message about the invalid interval
+        raise ValueError(f"Invalid interval: '{interval}'. Please provide a valid interval.")
+

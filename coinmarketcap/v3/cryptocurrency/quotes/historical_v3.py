@@ -1,21 +1,12 @@
-"""
-CoinMarketCap API client - Historical Quote Data Module
-
-This module provides functionality to retrieve historical cryptocurrency price data
-from the CoinMarketCap API v2. It includes helpers for validating input parameters
-and functions for fetching and processing historical quotes data.
-"""
-
 from typing import Optional, List
-import json
-from dateutil import parser
 import time
-from pprint import pprint
-
+from datetime import datetime
+from dateutil import parser
 from coinmarketcap.types.token_state import TokenState, Quote
+from coinmarketcap import Market
 from coinmarketcap.v1.cryptocurrency.listings.common import _validate_interval
 
-def _quotes_historical_v2(market,
+def _quotes_historical_v3(market,
 						  id: Optional[str] = None,
 						  ticker: Optional[str] = None,
 						  timestamp_start: Optional[int] = int(time.time()) - 60*60*24,
@@ -74,14 +65,14 @@ def _quotes_historical_v2(market,
 	else:
 		params['symbol'] = ticker
 		
-	response = market._request('v2/cryptocurrency/quotes/historical', params=params)
+	response = market._request('v3/cryptocurrency/quotes/historical', params=params)
 
 	lst_token_states = []
 
 	if id:
 		# if we are querying by id, we get a simpler (although not completely simple)
 		# structure to parse
-		dct_quote_summary = response['data']
+		dct_quote_summary = response['data'][id]
 	else:
 		# if we query by ticker we get a differeint weird structure, we have to 
 		# drill down into the quotes object for our ticker, we call this the quote 
@@ -91,7 +82,8 @@ def _quotes_historical_v2(market,
 
 	# and we also get some general meta-data that can go into the TokenState object
 	try:
-		id = dct_quote_summary['id']
+		if not id: 
+			id = dct_quote_summary['id']
 		name = dct_quote_summary['name']
 		symbol = dct_quote_summary['symbol']
 		is_active = dct_quote_summary['is_active'] == 1
@@ -116,7 +108,7 @@ def _quotes_historical_v2(market,
 
 		# create a token state, the quotes are empty for now
 		token_state = TokenState(
-			id=id,
+			id=int(id),
 			name=name,
 			symbol=symbol,
 			last_updated=timestamp_dt,
