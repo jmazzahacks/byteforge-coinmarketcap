@@ -3,6 +3,7 @@ from typing import List, Optional, Dict
 import time
 import datetime
 import json
+import logging
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
@@ -44,15 +45,19 @@ class Quote:
     @staticmethod
     def from_dict(currency: str, dct_quote_data: Dict) -> 'Quote':
 
-
         if 'price' not in dct_quote_data:
             print(f"Payload: {json.dumps(dct_quote_data, indent=4)}")
             raise ValueError("Payload must contain 'price' field.")
 
         # insure integers are handled as floats (so 1 becomes 1.0)
         dct_quote_data['price'] = float(dct_quote_data['price'])
-        dct_quote_data['market_cap'] = float(dct_quote_data['market_cap'])
 
+        # convert market_cap to float, if it's not a float, set it to -1.0
+        try:
+            dct_quote_data['market_cap'] = float(dct_quote_data['market_cap'])
+        except TypeError as e:
+            logging.warning(f"Error converting market_cap to float: {e}")
+            dct_quote_data['market_cap'] = 0.0
 
         # Handle both 'last_updated' and 'timestamp' for the last_updated field
         if 'last_updated' in dct_quote_data:
