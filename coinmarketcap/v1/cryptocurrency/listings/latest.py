@@ -2,6 +2,7 @@ from typing import List
 
 from coinmarketcap.types.token_state import TokenState
 from .common import SortOption, AuxFields, SortDir, FilterOptions
+from coinmarketcap.types.token_state_factory import TokenStateFactory
 
 def _listings_latest(market, 
 					sort_by: SortOption = SortOption.MARKET_CAP, 
@@ -56,6 +57,6 @@ def _listings_latest(market,
 			params['tag'] = ','.join(filters.tags)
 
 	response = market._request('v1/cryptocurrency/listings/latest', params=params, no_cache=True)
-	token_states = [TokenState.from_dict(token) for token in response['data']]
+	token_states = [TokenStateFactory.from_dict(token) for token in response['data']]
 
 	return token_states

@@ -42,39 +42,6 @@ class Quote:
     total_supply: Optional[float] = None
     circulating_supply: Optional[float] = None
 
-    @staticmethod
-    def from_dict(currency: str, dct_quote_data: Dict) -> 'Quote':
-
-        if 'price' not in dct_quote_data:
-            print(f"Payload: {json.dumps(dct_quote_data, indent=4)}")
-            raise ValueError("Payload must contain 'price' field.")
-
-        # insure integers are handled as floats (so 1 becomes 1.0)
-        dct_quote_data['price'] = float(dct_quote_data['price'])
-
-        # convert market_cap to float, if it's not a float, set it to -1.0
-        try:
-            dct_quote_data['market_cap'] = float(dct_quote_data['market_cap'])
-        except TypeError as e:
-            logging.warning(f"Error converting market_cap to float: {e}")
-            dct_quote_data['market_cap'] = 0.0
-
-        # Handle both 'last_updated' and 'timestamp' for the last_updated field
-        if 'last_updated' in dct_quote_data:
-            last_updated_str = dct_quote_data['last_updated']
-        elif 'timestamp' in dct_quote_data:
-            last_updated_str = dct_quote_data['timestamp']
-        else:
-            raise ValueError("Payload must contain either 'last_updated' or 'timestamp' field.")
-
-        # Remove both possible keys to avoid errors in the constructor
-        dct_quote_data.pop('last_updated', None)
-        dct_quote_data.pop('timestamp', None)
-
-        last_updated = parser.parse(last_updated_str)
-        
-        return Quote(base_currency=currency, last_updated=last_updated, **dct_quote_data)
-
 
 @dataclass
 class TokenState:
@@ -101,32 +68,4 @@ class TokenState:
     is_market_cap_included_in_calc: Optional[bool] = None
     is_active: Optional[bool] = None
     is_fiat: Optional[bool] = None
-
-
-    @staticmethod
-    def from_dict(data: Dict) -> 'TokenState':
-        data = data.copy()
-
-        # Convert 'is_market_cap_included_in_calc' from 0/1 to False/True
-        if 'is_market_cap_included_in_calc' in data:
-            data['is_market_cap_included_in_calc'] = bool(data['is_market_cap_included_in_calc'])
-
-        quote_map = {}
-        dct_quote_data = data.pop('quote')
-        for currency, dct_quote_data in dct_quote_data.items():
-            quote_map[currency] = Quote.from_dict(currency, dct_quote_data)
-        data['quote_map'] = quote_map
-
-        # Set optional attributes to None if not present in the data
-        optional_fields = [
-            'num_market_pairs', 'date_added', 'tags', 'max_supply', 'circulating_supply',
-            'total_supply', 'platform', 'cmc_rank', 'self_reported_circulating_supply',
-            'self_reported_market_cap', 'tvl_ratio'
-        ]
-
-        for attr_name in optional_fields:
-            if attr_name not in data:
-                data[attr_name] = None
-
-        return TokenState(**data)
 

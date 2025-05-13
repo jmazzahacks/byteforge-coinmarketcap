@@ -4,6 +4,7 @@ from datetime import datetime
 from dateutil import parser
 from coinmarketcap.types.token_state import TokenState, Quote
 from coinmarketcap.v1.cryptocurrency.listings.common import _validate_interval
+from coinmarketcap.types.quote_factory import QuoteFactory
 
 def _quotes_historical_v3(market,
 						  id: Optional[str] = None,
@@ -118,7 +119,7 @@ def _quotes_historical_v3(market,
 
 		# init each quote object and add it to the tokenstate
 		for base_currency, dct_quote_data in dct_quote_block['quote'].items():
-			quote = Quote.from_dict(base_currency, dct_quote_data)
+			quote = QuoteFactory.from_dict(base_currency, dct_quote_data)
 			token_state.quote_map[base_currency] = quote
 					
 		lst_token_states.append(token_state)
