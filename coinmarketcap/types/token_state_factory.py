@@ -1,5 +1,5 @@
 from typing import Dict
-from .token_state import TokenState
+from crypto_commons.types.token_state import TokenState
 from .quote_factory import QuoteFactory
 
 class TokenStateFactory:
@@ -17,11 +17,15 @@ class TokenStateFactory:
             quote_map[currency] = QuoteFactory.from_dict(currency, dct_quote_data)
         data['quote_map'] = quote_map
 
+        # Remap date_added to creation_date
+        if 'date_added' in data:
+            data['creation_date'] = data.pop('date_added')
+
         # Set optional attributes to None if not present in the data
         optional_fields = [
-            'num_market_pairs', 'date_added', 'tags', 'max_supply', 'circulating_supply',
+            'num_market_pairs', 'tags', 'max_supply', 'circulating_supply',
             'total_supply', 'platform', 'cmc_rank', 'self_reported_circulating_supply',
-            'self_reported_market_cap', 'tvl_ratio'
+            'self_reported_market_cap', 'tvl_ratio', 'creation_date'
         ]
 
         for attr_name in optional_fields:

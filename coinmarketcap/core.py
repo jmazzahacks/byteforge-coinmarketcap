@@ -9,7 +9,7 @@ from typing import Optional, List
 
 from requests_ratelimiter import LimiterAdapter
 
-from .types.token_state import TokenState, Quote
+from crypto_commons.types.token_state import TokenState
 from .v2.cryptocurrency.quotes.historical import _quotes_historical_v2
 from .v3.cryptocurrency.quotes.historical_v3 import _quotes_historical_v3
 from .v1.cryptocurrency.listings.latest import _listings_latest

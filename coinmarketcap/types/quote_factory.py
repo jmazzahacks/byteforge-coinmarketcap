@@ -2,7 +2,7 @@ from typing import Dict
 import json
 import logging
 from dateutil import parser
-from .token_state import Quote
+from crypto_commons.types.quote import Quote
 
 class QuoteFactory:
     @staticmethod
