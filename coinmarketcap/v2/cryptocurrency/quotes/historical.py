@@ -12,7 +12,8 @@ from dateutil import parser
 import time
 from pprint import pprint
 
-from coinmarketcap.types.token_state import TokenState, Quote
+from crypto_commons.types.token_state import TokenState
+from crypto_commons.types.quote import Quote
 from coinmarketcap.v1.cryptocurrency.listings.common import _validate_interval
 from coinmarketcap.types.quote_factory import QuoteFactory
 

@@ -4,7 +4,7 @@ import os
 import time
 from coinmarketcap.v3.cryptocurrency.quotes.historical_v3 import _quotes_historical_v3
 from coinmarketcap import Market
-from coinmarketcap.types.token_state import Quote
+from crypto_commons.types.quote import Quote
 from coinmarketcap.v1.cryptocurrency.listings.common import SortOption, AuxFields, SortDir, FilterOptions
 
 @pytest.fixture

@@ -1,6 +1,7 @@
 from typing import List
+import time
 
-from coinmarketcap.types.token_state import TokenState
+from crypto_commons.types.token_state import TokenState
 from .common import SortOption, AuxFields, SortDir, FilterOptions
 from coinmarketcap.types.token_state_factory import TokenStateFactory
 
@@ -57,6 +58,11 @@ def _listings_latest(market,
 			params['tag'] = ','.join(filters.tags)
 
 	response = market._request('v1/cryptocurrency/listings/latest', params=params, no_cache=True)
-	token_states = [TokenStateFactory.from_dict(token) for token in response['data']]
+
+	token_states = []
+	for dct_token in response['data']:
+		# Add timestamp if not present (and not expected to be for this API)
+		dct_token['timestamp'] = int(time.time())
+		token_states.append(TokenStateFactory.from_dict(dct_token))
 
 	return token_states
