@@ -1,6 +1,6 @@
 [project]
 name = "byteforge-coinmarketcap"
-version = "1.66"
+version = "1.7"
 description = "Python SDK for the coinmarketcap.com API."
 readme = "README.md"
 license = { file="LICENSE" }
@@ -12,13 +12,14 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 authors = [
-  { name = "Jason Byteforgia"}
+  { name = "Jason Byteforge"}
 ]
 dependencies = [
   "requests",
   "requests-cache",
   "python-dateutil",
-  "requests-ratelimiter"
+  "requests-ratelimiter",
+  "byteforge-crypto-commons"
 ]
 
 [build-system]
