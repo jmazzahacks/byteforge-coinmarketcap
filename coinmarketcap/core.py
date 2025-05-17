@@ -127,6 +127,31 @@ class Market(object):
 			symbols: List[str] = None,
 			sort: MapSortOption = MapSortOption.ID,
 			aux_fields: List[MapAuxFields] = None) -> List[TokenInfo]:
+		"""Returns a mapping of all cryptocurrencies to their CoinMarketCap IDs.
+
+		This method provides a mapping of all cryptocurrencies to their CoinMarketCap IDs, 
+		which can be used to make other API calls. The mapping includes basic information 
+		about each cryptocurrency.
+
+		Args:
+			listing_status (ListingStatus, optional): Filter by listing status. 
+				Can be ACTIVE, INACTIVE, or UNTRACKED. Defaults to ACTIVE.
+			start (int, optional): Starting point for pagination. Defaults to 1.
+			limit (int, optional): Number of results to return. Defaults to 100.
+			symbols (List[str], optional): List of cryptocurrency symbols to filter by. 
+				If None, returns all cryptocurrencies. Defaults to None.
+			sort (MapSortOption, optional): Field to sort results by. Can be ID or CMC_RANK. 
+				Defaults to ID.
+			aux_fields (List[MapAuxFields], optional): Additional fields to include in response. 
+				Can include PLATFORM, FIRST_HISTORICAL_DATA, LAST_HISTORICAL_DATA, IS_ACTIVE. 
+				Defaults to None.
+
+		Returns:
+			List[TokenInfo]: List of TokenInfo objects containing cryptocurrency mapping data.
+
+		Raises:
+			ServerException: If the API request fails.
+		"""
 		
 		return _map(self, listing_status, start, limit, symbols, sort, aux_fields)
 
