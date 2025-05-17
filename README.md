@@ -63,7 +63,7 @@ for token in tokens:
 
 The `convert` parameter enhances your ability to receive cryptocurrency quotes in multiple currencies simultaneously. This feature is especially useful for comparing market values across different fiat and cryptocurrencies, allowing up to three currency conversions in a single request.
 
-**Please Note:** You’ll need a hobbyist account or higher to do more than one conversion at a time.
+**Please Note:** You'll need a hobbyist account or higher to do more than one conversion at a time.
 
 Here's how you can retrieve the latest listings and obtain quotes in USD and BTC for the top 5 cryptocurrencies by market capitalization:
 
@@ -255,8 +255,81 @@ When fetching historical quotes, you can specify the `interval` parameter to det
 
 Please ensure to select the interval that best matches your data analysis needs.
 
+## Usage: API map
 
-To include the new `calls_left_today` routine in your existing project documentation, add a section that explains its purpose, usage, and example code on how to call it. Below is a suggested format for including this information in your README:
+The `map` endpoint provides a mapping of all cryptocurrencies to their CoinMarketCap IDs, which is essential for making other API calls. This endpoint is particularly useful for obtaining basic information about cryptocurrencies and their identifiers.
+
+### Basic Usage
+
+```python
+from coinmarketcap import Market, ListingStatus, MapSortOption, MapAuxFields
+
+coinmarketcap = Market(api_key='your_api_key')
+
+# Get basic mapping of active cryptocurrencies
+token_infos = coinmarketcap.map(
+    listing_status=ListingStatus.ACTIVE,
+    limit=5
+)
+
+for token in token_infos:
+    print(f"{token.name} ({token.symbol}) - ID: {token.id}")
+
+# Example output:
+# Bitcoin (BTC) - ID: 1
+# Ethereum (ETH) - ID: 1027
+# Tether USDt (USDT) - ID: 825
+# BNB (BNB) - ID: 1839
+# Solana (SOL) - ID: 5426
+```
+
+### Advanced Usage with Filters and Additional Fields
+
+```python
+# Get detailed mapping with additional fields
+token_infos = coinmarketcap.map(
+    listing_status=ListingStatus.ACTIVE,
+    symbols=['BTC', 'ETH', 'SOL'],
+    sort=MapSortOption.CMC_RANK,
+    aux_fields=[
+        MapAuxFields.PLATFORM,
+        MapAuxFields.FIRST_HISTORICAL_DATA,
+        MapAuxFields.LAST_HISTORICAL_DATA,
+        MapAuxFields.IS_ACTIVE
+    ]
+)
+
+for token in token_infos:
+    print(f"{token.name} ({token.symbol})")
+    print(f"  ID: {token.id}")
+    print(f"  Platform: {token.platform}")
+    print(f"  First Historical Data: {token.first_historical_data}")
+    print(f"  Last Historical Data: {token.last_historical_data}")
+    print(f"  Is Active: {token.is_active}")
+```
+
+### Parameters
+
+- `listing_status` (ListingStatus): Filter by listing status
+  - `ACTIVE`: Only active cryptocurrencies
+  - `INACTIVE`: Only inactive cryptocurrencies
+  - `UNTRACKED`: Only untracked cryptocurrencies
+
+- `start` (int): Starting point for pagination (default: 1)
+
+- `limit` (int): Number of results to return (default: 100)
+
+- `symbols` (List[str]): List of cryptocurrency symbols to filter by
+
+- `sort` (MapSortOption): Field to sort results by
+  - `ID`: Sort by CoinMarketCap ID
+  - `CMC_RANK`: Sort by CoinMarketCap rank
+
+- `aux_fields` (List[MapAuxFields]): Additional fields to include in response
+  - `PLATFORM`: Platform information
+  - `FIRST_HISTORICAL_DATA`: First historical data timestamp
+  - `LAST_HISTORICAL_DATA`: Last historical data timestamp
+  - `IS_ACTIVE`: Active status
 
 ## Monitoring API Usage
 
