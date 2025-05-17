@@ -10,6 +10,7 @@ from typing import Optional, List
 from requests_ratelimiter import LimiterAdapter
 
 from .types.token_info import TokenInfo
+from .v1.cryptocurrency.map import ListingStatus
 from crypto_commons.types.token_state import TokenState
 from .v2.cryptocurrency.quotes.historical import _quotes_historical_v2
 from .v3.cryptocurrency.quotes.historical_v3 import _quotes_historical_v3
@@ -119,8 +120,10 @@ class Market(object):
 		except Exception as e:
 			raise e
 
-	def map(self) -> List[TokenInfo]:
-		return _map(self)
+	def map(self, 
+			listing_status: ListingStatus = ListingStatus.ACTIVE, 
+			limit: int = 100) -> List[TokenInfo]:
+		return _map(self, listing_status, limit)
 
 	def quotes_historical(self,
 						  id: Optional[str] = None,

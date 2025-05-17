@@ -5,14 +5,14 @@ from typing import Optional
 @dataclass
 class TokenInfo:
     id: int
-    rank: int
+    rank: Optional[int]
     name: str
     symbol: str
     slug: str
     is_active: int
     status: int
-    first_historical_data: datetime
-    last_historical_data: datetime
+    first_historical_data: Optional[datetime] = None
+    last_historical_data: Optional[datetime] = None
     platform: Optional[str] = None
 
     @classmethod
@@ -20,13 +20,13 @@ class TokenInfo:
         """Create a TokenInfo instance from a dictionary."""
         return cls(
             id=data['id'],
-            rank=data['rank'],
+            rank=data.get('rank'),
             name=data['name'],
             symbol=data['symbol'],
             slug=data['slug'],
             is_active=data['is_active'],
             status=data['status'],
-            first_historical_data=datetime.fromisoformat(data['first_historical_data'].replace('Z', '+00:00')),
-            last_historical_data=datetime.fromisoformat(data['last_historical_data'].replace('Z', '+00:00')),
+            first_historical_data=datetime.fromisoformat(data['first_historical_data'].replace('Z', '+00:00')) if 'first_historical_data' in data else None,
+            last_historical_data=datetime.fromisoformat(data['last_historical_data'].replace('Z', '+00:00')) if 'last_historical_data' in data else None,
             platform=data.get('platform')
         )
