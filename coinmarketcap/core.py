@@ -9,6 +9,7 @@ from typing import Optional, List
 
 from requests_ratelimiter import LimiterAdapter
 
+from .types.token_info import TokenInfo
 from crypto_commons.types.token_state import TokenState
 from .v2.cryptocurrency.quotes.historical import _quotes_historical_v2
 from .v3.cryptocurrency.quotes.historical_v3 import _quotes_historical_v3
@@ -16,6 +17,7 @@ from .v1.cryptocurrency.listings.latest import _listings_latest
 from .v1.cryptocurrency.listings.common import SortOption, AuxFields, SortDir, FilterOptions
 from .v1.key.info import _key_info
 from .v1.key.info import _safe_daily_call_limit
+from .v1.cryptocurrency.map import _map
 
 class ServerException(Exception):
     def __init__(self, status_code, message):
@@ -116,6 +118,9 @@ class Market(object):
 				raise ServerException(response_object.status_code, response_object.text)
 		except Exception as e:
 			raise e
+
+	def map(self) -> List[TokenInfo]:
+		return _map(self)
 
 	def quotes_historical(self,
 						  id: Optional[str] = None,
