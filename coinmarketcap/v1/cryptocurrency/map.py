@@ -1,7 +1,7 @@
-from coinmarketcap.types.token_info import TokenInfo
-from enum import Enum
 from typing import List
-from pprint import pprint
+from enum import Enum
+from coinmarketcap.types.token_info import TokenInfo
+from coinmarketcap.types.token_info_factory import TokenInfoFactory
 
 class ListingStatus(Enum):
     ACTIVE = "active"
@@ -12,7 +12,7 @@ class MapSortOption(Enum):
     ID = "id"
     CMC_RANK = "cmc_rank"
 
-# "platform,first_historical_data,last_historical_data,is_active"
+
 class MapAuxFields(Enum):
     PLATFORM = "platform"
     FIRST_HISTORICAL_DATA = "first_historical_data"
@@ -40,4 +40,4 @@ def _map(market,
 
     response = market._request('v1/cryptocurrency/map', params=params)
    
-    return [TokenInfo.from_dict(item) for item in response['data']]
+    return [TokenInfoFactory.from_dict(item) for item in response['data']]
