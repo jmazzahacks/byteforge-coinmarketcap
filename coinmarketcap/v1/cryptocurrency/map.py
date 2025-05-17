@@ -1,6 +1,6 @@
 from typing import List
 from enum import Enum
-from coinmarketcap.types.token_info import TokenInfo
+from crypto_commons.types.token_info import TokenInfo
 from coinmarketcap.types.token_info_factory import TokenInfoFactory
 
 class ListingStatus(Enum):
