@@ -18,7 +18,7 @@ from .v1.cryptocurrency.listings.latest import _listings_latest
 from .v1.cryptocurrency.listings.common import SortOption, AuxFields, SortDir, FilterOptions
 from .v1.key.info import _key_info
 from .v1.key.info import _safe_daily_call_limit
-from .v1.cryptocurrency.map import _map, MapSortOption
+from .v1.cryptocurrency.map import _map, MapSortOption, MapAuxFields
 
 class ServerException(Exception):
     def __init__(self, status_code, message):
@@ -125,9 +125,10 @@ class Market(object):
 			start: int = 1,
 			limit: int = 100,
 			symbols: List[str] = None,
-			sort: MapSortOption = MapSortOption.ID) -> List[TokenInfo]:
+			sort: MapSortOption = MapSortOption.ID,
+			aux_fields: List[MapAuxFields] = None) -> List[TokenInfo]:
 		
-		return _map(self, listing_status, start, limit, symbols, sort)
+		return _map(self, listing_status, start, limit, symbols, sort, aux_fields)
 
 	def quotes_historical(self,
 						  id: Optional[str] = None,
