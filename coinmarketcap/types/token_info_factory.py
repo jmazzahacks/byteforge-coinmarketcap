@@ -1,6 +1,6 @@
 from typing import Dict
 from datetime import datetime
-from .token_info import TokenInfo
+from crypto_commons.types.token_info import TokenInfo
 
 class TokenInfoFactory:
     @staticmethod
