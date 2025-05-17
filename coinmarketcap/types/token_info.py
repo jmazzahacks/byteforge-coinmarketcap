@@ -9,8 +9,8 @@ class TokenInfo:
     name: str
     symbol: str
     slug: str
-    is_active: int
     status: int
+    is_active: Optional[int] = None
     first_historical_data: Optional[datetime] = None
     last_historical_data: Optional[datetime] = None
     platform: Optional[str] = None
@@ -24,7 +24,7 @@ class TokenInfo:
             name=data['name'],
             symbol=data['symbol'],
             slug=data['slug'],
-            is_active=data['is_active'],
+            is_active=data.get('is_active'),
             status=data['status'],
             first_historical_data=datetime.fromisoformat(data['first_historical_data'].replace('Z', '+00:00')) if 'first_historical_data' in data else None,
             last_historical_data=datetime.fromisoformat(data['last_historical_data'].replace('Z', '+00:00')) if 'last_historical_data' in data else None,
