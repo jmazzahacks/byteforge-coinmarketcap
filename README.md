@@ -2,9 +2,14 @@
 
 This project is a fork of Martin Simon's 'coinmarketcap' module, which had not been updated for a long while ([original repository](https://github.com/barnumbirr/coinmarketcap)). This version has been extensively reworked to be compatible with the current CoinMarketCap API, diverging significantly from the original source. As a result, it is not backwards compatible, but it brings new capabilities and improvements tailored to the current API's structure and requirements.
 
-This project currently supports the `v1/cryptocurrency/listings/latest` endpoint which is usable by anyone with a a free API key from CoinMarketCap. Obtain your free API key by signing up at [CoinMarketCap API](https://pro.coinmarketcap.com/signup/). 
+This project currently supports the following CoinMarketCap API endpoints:
 
-It also supports the `/v2/cryptocurrency/quotes/historical` endpoint which requires a paid 'Hobbyist' level account or higher.
+- `v1/cryptocurrency/listings/latest`: Get the latest market data for all cryptocurrencies
+- `v1/cryptocurrency/map`: Get a mapping of all cryptocurrencies to their CoinMarketCap IDs
+- `v2/cryptocurrency/quotes/historical`: Get historical quotes for cryptocurrencies (requires Hobbyist tier or higher)
+- `v3/cryptocurrency/quotes/historical`: Get historical quotes for cryptocurrencies with enhanced features (requires Hobbyist tier or higher)
+
+The `listings_latest` and `map` endpoints are available with a free API key from CoinMarketCap. Obtain your free API key by signing up at [CoinMarketCap API](https://pro.coinmarketcap.com/signup/). 
 
 ## Prerequisites
 
