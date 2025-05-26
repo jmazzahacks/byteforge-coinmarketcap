@@ -5,7 +5,7 @@ import requests
 import tempfile
 import time
 import requests_cache
-from typing import Optional, List
+from typing import Optional, List, Dict, Union
 
 from requests_ratelimiter import LimiterAdapter
 
@@ -19,6 +19,7 @@ from .v1.cryptocurrency.listings.common import SortOption, AuxFields, SortDir, F
 from .v1.key.info import _key_info
 from .v1.key.info import _safe_daily_call_limit
 from .v1.cryptocurrency.map import _map, MapSortOption, MapAuxFields
+from .v3.fear_and_greed.historical import _fear_and_greed_historical
 
 class ServerException(Exception):
     def __init__(self, status_code, message):
@@ -119,6 +120,18 @@ class Market(object):
 				raise ServerException(response_object.status_code, response_object.text)
 		except Exception as e:
 			raise e
+
+	def fear_and_greed_historical(self, start: int, limit: int) -> List[Dict[str, Union[str, int]]]:
+		"""
+		Retrieves historical fear and greed index data from the CoinMarketCap API.
+
+		Returns:
+			List[Dict[str, Union[str, int]]]: A list of dictionaries containing:
+				- timestamp (str): Unix timestamp of the measurement
+				- value (int): The fear and greed index value (0-100)
+				- value_classification (str): Classification of the value (e.g., 'Greed', 'Fear', etc.)
+		"""
+		return _fear_and_greed_historical(self, start, limit)
 
 	def map(self, 
 			listing_status: ListingStatus = ListingStatus.ACTIVE, 
