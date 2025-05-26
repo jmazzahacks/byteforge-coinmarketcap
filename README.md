@@ -336,6 +336,59 @@ for token in token_infos:
   - `LAST_HISTORICAL_DATA`: Last historical data timestamp
   - `IS_ACTIVE`: Active status
 
+## Usage: API fear_and_greed_historical
+
+The `fear_and_greed_historical` endpoint provides access to the historical Fear & Greed Index data from CoinMarketCap. This index is a market sentiment indicator that helps gauge whether the market is being driven by fear or greed.
+
+### Basic Usage
+
+```python
+from coinmarketcap import Market
+
+coinmarketcap = Market(api_key='your_api_key')
+
+# Get historical fear and greed index data
+fear_greed_data = coinmarketcap.fear_and_greed_historical(
+    start=1,  # Starting point for pagination
+    limit=10  # Number of results to return
+)
+
+for entry in fear_greed_data:
+    print(f"Timestamp: {entry['timestamp']}")
+    print(f"Value: {entry['value']}")
+    print(f"Classification: {entry['value_classification']}")
+    print("---")
+
+# Example output:
+# Timestamp: 1748131200
+# Value: 67
+# Classification: Greed
+# ---
+# Timestamp: 1748044800
+# Value: 67
+# Classification: Greed
+# ---
+```
+
+### Parameters
+
+- `start` (int): Starting point for pagination (default: 1)
+- `limit` (int): Number of results to return (default: 500)
+
+### Return Value
+
+The method returns a list of dictionaries, where each dictionary contains:
+- `timestamp` (str): Unix timestamp of the measurement
+- `value` (int): The fear and greed index value (0-100)
+- `value_classification` (str): Classification of the value (e.g., 'Greed', 'Fear', etc.)
+
+The Fear & Greed Index ranges from 0 to 100:
+- 0-24: Extreme Fear
+- 25-49: Fear
+- 50: Neutral
+- 51-74: Greed
+- 75-100: Extreme Greed
+
 ## Monitoring API Usage
 
 As you utilize the API, it's important to manage the number of requests to stay within your plan's limits. The `safe_daily_call_limit` function provides an easy way to verify your daily API limits against your monthly call budget.
