@@ -10,7 +10,7 @@ from coinmarketcap.v1.cryptocurrency.listings.common import SortOption, AuxField
 @pytest.fixture
 def coinmarketcap_instance():
     # You can initialize your CoinMarketCap instance with your API key here if needed
-    api_key=API_KEY = os.environ.get('COIN_MARKET_CAP_API_KEY')
+    api_key = "ba65197c-f52a-4119-8ad6-e26a69fa82cc"
     coinmarketcap_instance = Market(api_key=api_key, debug_mode=True)
     yield coinmarketcap_instance
 
@@ -44,6 +44,7 @@ def test_cryptocurrency_quotes_historical_with_id(coinmarketcap_instance):
     assert isinstance(token_state.is_active, bool)
     assert isinstance(token_state.is_fiat, bool)
     assert isinstance(token_state.quote_map, dict)
+    assert isinstance(token_state.tags, list)
 
     # Check the attributes of the USD quote
     quote = token_state.quote_map['USD']
