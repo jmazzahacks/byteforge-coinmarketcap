@@ -20,6 +20,8 @@ from .v1.key.info import _key_info
 from .v1.key.info import _safe_daily_call_limit
 from .v1.cryptocurrency.map import _map, MapSortOption, MapAuxFields
 from .v3.fear_and_greed.historical import _fear_and_greed_historical
+from .v4.dex.listings.info import _dex_listings_info, DexAuxFields
+from .types.dex_info import DexInfo, DexUrls
 
 class ServerException(Exception):
     def __init__(self, status_code, message):
@@ -228,3 +230,40 @@ class Market(object):
 				till the reset date and a monthly limit.
 		"""		
 		return _safe_daily_call_limit(self)
+
+	def dex_listings_info(self,
+						 ids: Union[int, List[int]],
+						 aux_fields: Optional[List[DexAuxFields]] = None) -> List[DexInfo]:
+		"""
+		Get information about specific DEX (Decentralized Exchanges) by their IDs.
+
+		This method retrieves detailed information about specific decentralized exchanges
+		from the CoinMarketCap API. Unlike other listings endpoints, this requires specific
+		DEX IDs and does not support pagination, sorting, or filtering.
+
+		Args:
+			ids (Union[int, List[int]]): Single DEX ID or list of DEX IDs to retrieve
+				information for. At least one ID is required.
+			aux_fields (List[DexAuxFields], optional): Additional fields to include in response.
+				Can include URLS, LOGO, DESCRIPTION, DATE_LAUNCHED, NOTICE.
+				Defaults to None (returns only basic fields: id, name, slug, status).
+
+		Returns:
+			List[DexInfo]: List of DexInfo objects containing DEX information including
+				ID, name, slug, status, and any requested auxiliary fields.
+
+		Raises:
+			ValueError: If no IDs are provided.
+			ServerException: If the API request fails.
+
+		Example:
+			# Get info for a single DEX with all auxiliary fields
+			dex_info = market.dex_listings_info(
+				ids=11955,
+				aux_fields=[DexAuxFields.URLS, DexAuxFields.LOGO, DexAuxFields.DESCRIPTION]
+			)
+
+			# Get info for multiple DEXs
+			dex_info = market.dex_listings_info(ids=[11955, 12345])
+		"""
+		return _dex_listings_info(self, ids, aux_fields)

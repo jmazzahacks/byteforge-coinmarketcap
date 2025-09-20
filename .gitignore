@@ -10,3 +10,4 @@ pyvenv.cfg
 main.py
 build_publish.sh
 dist
+dev_scripts
