@@ -8,6 +8,7 @@ This project currently supports the following CoinMarketCap API endpoints:
 - `v1/cryptocurrency/map`: Get a mapping of all cryptocurrencies to their CoinMarketCap IDs
 - `v2/cryptocurrency/quotes/historical`: Get historical quotes for cryptocurrencies (requires Hobbyist tier or higher)
 - `v3/cryptocurrency/quotes/historical`: Get historical quotes for cryptocurrencies with enhanced features (requires Hobbyist tier or higher)
+- `v4/dex/listings/info`: Get detailed information about specific decentralized exchanges (DEXs)
 
 The `listings_latest` and `map` endpoints are available with a free API key from CoinMarketCap. Obtain your free API key by signing up at [CoinMarketCap API](https://pro.coinmarketcap.com/signup/). 
 
@@ -388,6 +389,128 @@ The Fear & Greed Index ranges from 0 to 100:
 - 50: Neutral
 - 51-74: Greed
 - 75-100: Extreme Greed
+
+## Usage: API dex_listings_info
+
+The `dex_listings_info` endpoint provides detailed information about specific decentralized exchanges (DEXs) by their CoinMarketCap IDs. Unlike other listing endpoints, this endpoint requires specific DEX IDs and does not support pagination, sorting, or filtering.
+
+### Basic Usage
+
+```python
+from coinmarketcap import Market
+
+coinmarketcap = Market(api_key='your_api_key')
+
+# Get basic information for a single DEX (Uniswap v4 example)
+dex_info = coinmarketcap.dex_listings_info(ids=11955)
+
+for dex in dex_info:
+    print(f"{dex.name} ({dex.id})")
+    print(f"Slug: {dex.slug}")
+    print(f"Status: {dex.status}")
+
+# Example output:
+# Uniswap v4 (Ethereum) (11955)
+# Slug: uniswap-v4
+# Status: active
+```
+
+### Usage with Auxiliary Fields
+
+To get more detailed information, you can specify auxiliary fields:
+
+```python
+from coinmarketcap import Market
+from coinmarketcap.core import DexAuxFields
+
+coinmarketcap = Market(api_key='your_api_key')
+
+# Get detailed information with all auxiliary fields
+dex_info = coinmarketcap.dex_listings_info(
+    ids=11955,
+    aux_fields=[
+        DexAuxFields.URLS,
+        DexAuxFields.LOGO,
+        DexAuxFields.DESCRIPTION,
+        DexAuxFields.DATE_LAUNCHED,
+        DexAuxFields.NOTICE
+    ]
+)
+
+for dex in dex_info:
+    print(f"{dex.name} ({dex.id})")
+    print(f"Logo: {dex.logo}")
+    print(f"Description: {dex.description}")
+    print(f"Date Launched: {dex.date_launched}")
+    print(f"Notice: {dex.notice}")
+
+    if dex.urls:
+        print(f"Website: {dex.urls.website}")
+        print(f"Twitter: {dex.urls.twitter}")
+        print(f"Blog: {dex.urls.blog}")
+        print(f"Chat: {dex.urls.chat}")
+        print(f"Fee Info: {dex.urls.fee}")
+
+# Example output:
+# Uniswap v4 (Ethereum) (11955)
+# Logo: https://s2.coinmarketcap.com/static/img/exchanges/64x64/11955.png
+# Description: None
+# Date Launched: None
+# Notice:
+# Website: ['https://app.uniswap.org/swap']
+# Twitter: ['https://x.com/Uniswap']
+# Blog: ['']
+# Chat: ['']
+# Fee Info: ['']
+```
+
+### Multiple DEXs
+
+You can retrieve information for multiple DEXs at once:
+
+```python
+# Get information for multiple DEXs
+dex_info = coinmarketcap.dex_listings_info(
+    ids=[11955, 12345, 67890],  # Replace with actual DEX IDs
+    aux_fields=[DexAuxFields.URLS, DexAuxFields.LOGO]
+)
+
+for dex in dex_info:
+    print(f"{dex.name} - Status: {dex.status}")
+    if dex.urls and dex.urls.website:
+        print(f"  Website: {dex.urls.website[0]}")
+```
+
+### Parameters
+
+- `ids` (Union[int, List[int]]): **Required**. Single DEX ID or list of DEX IDs to retrieve information for. At least one ID must be provided.
+
+- `aux_fields` (List[DexAuxFields], optional): Additional fields to include in the response:
+  - `URLS`: URLs associated with the DEX (website, twitter, blog, chat, fee)
+  - `LOGO`: Logo URL for the DEX
+  - `DESCRIPTION`: Description of the DEX
+  - `DATE_LAUNCHED`: Launch date of the DEX
+  - `NOTICE`: Any notices or announcements about the DEX
+
+### Return Value
+
+The method returns a list of `DexInfo` objects, where each object contains:
+- `id` (int): CoinMarketCap DEX ID
+- `name` (str): Name of the DEX
+- `slug` (str): URL slug for the DEX
+- `status` (str): Current status (e.g., 'active')
+- `logo` (str, optional): Logo URL (if requested via aux_fields)
+- `description` (str, optional): DEX description (if requested via aux_fields)
+- `date_launched` (str, optional): Launch date (if requested via aux_fields)
+- `notice` (str, optional): Notice text (if requested via aux_fields)
+- `urls` (DexUrls, optional): URL collection (if requested via aux_fields)
+- `timestamp` (int): Timestamp when the data was retrieved
+
+### Important Notes
+
+- **DEX IDs Required**: Unlike other listing endpoints, this endpoint requires specific DEX IDs. You cannot get a general listing of all DEXs.
+- **No Pagination/Sorting**: This endpoint does not support pagination, sorting, or filtering parameters.
+- **Auxiliary Fields**: Without auxiliary fields, only basic information (id, name, slug, status) is returned.
 
 ## Monitoring API Usage
 
