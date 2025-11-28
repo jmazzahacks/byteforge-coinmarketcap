@@ -1,6 +1,6 @@
 [project]
 name = "byteforge-coinmarketcap"
-version = "2.0"
+version = "2.1"
 description = "Python SDK for the coinmarketcap.com API."
 readme = "README.md"
 license = { file="LICENSE" }
@@ -19,7 +19,7 @@ dependencies = [
   "requests-cache",
   "python-dateutil",
   "requests-ratelimiter",
-  "byteforge-crypto-commons"
+  "byteforge-crypto-commons>=0.3"
 ]
 
 [build-system]

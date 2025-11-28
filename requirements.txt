@@ -5,4 +5,4 @@ python-dateutil
 requests-ratelimiter
 build
 twine
-byteforge-crypto-commons
+byteforge-crypto-commons>=0.3
