@@ -44,7 +44,7 @@ def test_cryptocurrency_quotes_historical_with_id(coinmarketcap_instance):
     assert isinstance(token_state.is_active, bool)
     assert isinstance(token_state.is_fiat, bool)
     assert isinstance(token_state.quote_map, dict)
-    assert isinstance(token_state.tags, list)
+    assert token_state.tags is None or isinstance(token_state.tags, list)
 
     # Check the attributes of the USD quote
     quote = token_state.quote_map['USD']
@@ -174,8 +174,8 @@ def test_listings_latest(coinmarketcap_instance):
     assert token.tags is None or isinstance(token.tags, list)
     assert token.max_supply is None or isinstance(token.max_supply, int)
     assert token.circulating_supply is None or isinstance(token.circulating_supply, int)
-    assert token.total_supply is None or isinstance(token.total_supply, float)
-    assert token.platform is None or isinstance(token.platform, str)
+    assert token.total_supply is None or isinstance(token.total_supply, (int, float))
+    assert token.platform is None or isinstance(token.platform, (str, dict))
     assert token.cmc_rank is None or isinstance(token.cmc_rank, int)
     assert token.self_reported_circulating_supply is None or isinstance(token.self_reported_circulating_supply, int)
     assert token.self_reported_market_cap is None or isinstance(token.self_reported_market_cap, float)

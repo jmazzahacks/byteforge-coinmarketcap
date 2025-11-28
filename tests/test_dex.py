@@ -1,7 +1,8 @@
 import pytest
 import os
+from functools import wraps
 from coinmarketcap import Market
-from coinmarketcap.core import DexAuxFields
+from coinmarketcap.core import DexAuxFields, ServerException
 from coinmarketcap.types.dex_info import DexInfo, DexUrls
 
 @pytest.fixture
@@ -12,6 +13,20 @@ def market_instance():
         pytest.skip("COIN_MARKET_CAP_API_KEY environment variable not set")
     return Market(api_key=api_key, debug_mode=True)
 
+
+def skip_if_endpoint_not_supported(func):
+    """Decorator to skip tests if API subscription doesn't support DEX endpoints"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except ServerException as e:
+            if e.status_code == 403 and "subscription plan doesn't support" in str(e):
+                pytest.skip("API subscription doesn't support DEX endpoints")
+            raise
+    return wrapper
+
+@skip_if_endpoint_not_supported
 def test_dex_listings_info_single_id(market_instance):
     """Test DEX listings info retrieval with single ID"""
 
@@ -30,6 +45,7 @@ def test_dex_listings_info_single_id(market_instance):
     assert isinstance(dex.slug, str)
     assert isinstance(dex.status, str)
 
+@skip_if_endpoint_not_supported
 def test_dex_listings_info_with_aux_fields(market_instance):
     """Test DEX listings info with auxiliary fields"""
 
@@ -63,6 +79,7 @@ def test_dex_listings_info_with_aux_fields(market_instance):
         assert isinstance(dex.urls.website, list)
         assert isinstance(dex.urls.twitter, list)
 
+@skip_if_endpoint_not_supported
 def test_dex_listings_info_multiple_ids(market_instance):
     """Test DEX listings info with multiple IDs"""
 
@@ -85,6 +102,7 @@ def test_dex_listings_info_no_ids_raises_error(market_instance):
     with pytest.raises(ValueError, match="At least one DEX ID must be provided"):
         market_instance.dex_listings_info(ids=[])
 
+@skip_if_endpoint_not_supported
 def test_dex_info_structure(market_instance):
     """Test that DexInfo objects have the expected structure"""
 
