@@ -1,4 +1,5 @@
 from typing import Dict
+import dataclasses
 import json
 import logging
 from dateutil import parser
@@ -35,4 +36,8 @@ class QuoteFactory:
 
         last_updated = parser.parse(last_updated_str)
         
-        return Quote(base_currency=currency, last_updated=last_updated, **dct_quote_data)
+        # Filter out unknown fields to prevent crashes when CoinMarketCap adds new response fields
+        known_fields = {f.name for f in dataclasses.fields(Quote)}
+        filtered = {k: v for k, v in dct_quote_data.items() if k in known_fields}
+
+        return Quote(base_currency=currency, last_updated=last_updated, **filtered)
