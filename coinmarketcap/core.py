@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import logging
 import requests
 import tempfile
 import time
@@ -24,10 +25,17 @@ from .v4.dex.listings.info import _dex_listings_info, DexAuxFields
 from .types.dex_info import DexInfo, DexUrls
 
 class ServerException(Exception):
-    def __init__(self, status_code, message):
+    def __init__(self, status_code: int, message: str):
         self.status_code = status_code
         self.message = message
         super().__init__(f"Server returned {status_code} - {message}")
+
+
+class MalformedResponseError(Exception):
+    def __init__(self, endpoint: str, message: str, raw_body: str = ""):
+        self.endpoint = endpoint
+        self.raw_body = raw_body
+        super().__init__(f"Malformed response from {endpoint}: {message}")
 
 
 class Market(object):
@@ -104,24 +112,32 @@ class Market(object):
 			if params:
 				print("Request Payload:\n" + json.dumps(params, indent=4))
 
-		try:
-			if no_cache:
-				response_object = self.session.get(self.base_url + endpoint, params=params, timeout=self.request_timeout)
-			else:
-				response_object = self.caching_session.get(self.base_url + endpoint, params=params, timeout=self.request_timeout)
-			
-			if self._debug_mode:
-				print('Response Code: ' + str(response_object.status_code))
-				if hasattr(response_object, 'from_cache'):
-					print('From Cache?: ' + str(response_object.from_cache))
-				print("Response Payload:\n" + json.dumps(response_object.json(), indent=4))
+		if no_cache:
+			response_object = self.session.get(self.base_url + endpoint, params=params, timeout=self.request_timeout)
+		else:
+			response_object = self.caching_session.get(self.base_url + endpoint, params=params, timeout=self.request_timeout)
 
-			if response_object.status_code == requests.codes.ok:
-				return response_object.json()
-			else:
-				raise ServerException(response_object.status_code, response_object.text)
-		except Exception as e:
-			raise e
+		if self._debug_mode:
+			print('Response Code: ' + str(response_object.status_code))
+			if hasattr(response_object, 'from_cache'):
+				print('From Cache?: ' + str(response_object.from_cache))
+
+		if response_object.status_code != requests.codes.ok:
+			raise ServerException(response_object.status_code, response_object.text)
+
+		try:
+			response_json = response_object.json()
+		except (json.JSONDecodeError, ValueError):
+			logging.error("Non-JSON response from %s: %s", endpoint, response_object.text[:500])
+			raise MalformedResponseError(endpoint, "Response is not valid JSON", response_object.text[:500])
+
+		if self._debug_mode:
+			print("Response Payload:\n" + json.dumps(response_json, indent=4))
+
+		if 'data' not in response_json:
+			logging.warning("Response from %s missing 'data' key: %s", endpoint, json.dumps(response_json)[:500])
+
+		return response_json
 
 	def fear_and_greed_historical(self, start: int, limit: int) -> List[Dict[str, Union[str, int]]]:
 		"""
