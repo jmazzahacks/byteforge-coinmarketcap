@@ -21,5 +21,5 @@ def _fear_and_greed_historical(market, start: int = 1, limit: int = 500) -> List
 		'limit': limit
 	}
 
-	response = market._request('/v3/fear-and-greed/historical', params=params)
+	response = market._request('v3/fear-and-greed/historical', params=params)
 	return response.get('data', [])

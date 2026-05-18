@@ -107,15 +107,17 @@ class Market(object):
 	
 
 	def _request(self, endpoint, params = {}, no_cache = False):
+		url = self.base_url.rstrip('/') + '/' + endpoint.lstrip('/')
+
 		if self._debug_mode:
-			print('Request URL: ' + self.base_url + endpoint)
+			print('Request URL: ' + url)
 			if params:
 				print("Request Payload:\n" + json.dumps(params, indent=4))
 
 		if no_cache:
-			response_object = self.session.get(self.base_url + endpoint, params=params, timeout=self.request_timeout)
+			response_object = self.session.get(url, params=params, timeout=self.request_timeout)
 		else:
-			response_object = self.caching_session.get(self.base_url + endpoint, params=params, timeout=self.request_timeout)
+			response_object = self.caching_session.get(url, params=params, timeout=self.request_timeout)
 
 		if self._debug_mode:
 			print('Response Code: ' + str(response_object.status_code))
