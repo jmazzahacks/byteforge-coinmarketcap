@@ -14,7 +14,7 @@ def _key_info(market):
     Returns:
         dict: A dictionary containing detailed key configuration information such as API limits.
     """
-    dct_response = market._request('v1/key/info', ignore_cache=True)
+    dct_response = market._request('v1/key/info', no_cache=True)
     return dct_response['data']
 
 
