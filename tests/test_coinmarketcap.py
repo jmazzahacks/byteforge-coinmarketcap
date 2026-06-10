@@ -286,3 +286,52 @@ def test_cryptocurrency_info_validation(coinmarketcap_instance):
 
     with pytest.raises(ValueError, match="up to 100 IDs"):
         coinmarketcap_instance.cryptocurrency_info(ids=list(range(101)))
+
+
+def test_fear_and_greed_historical(coinmarketcap_instance):
+    # Regression test for commit 2689a41 — the endpoint was returning 403
+    # from CloudFront due to a leading '/' in the request path that produced
+    # a double-slashed URL. If this test ever fails with a 403, check the
+    # endpoint path in coinmarketcap/v3/fear_and_greed/historical.py.
+    data = coinmarketcap_instance.fear_and_greed_historical(start=1, limit=5)
+
+    assert isinstance(data, list)
+    assert len(data) == 5
+
+    first = data[0]
+    assert isinstance(first, dict)
+    assert set(first.keys()) >= {'timestamp', 'value', 'value_classification'}
+    assert isinstance(first['value_classification'], str)
+    # 'value' is a 0-100 integer; CMC returns it as int
+    assert 0 <= int(first['value']) <= 100
+
+
+def test_map(coinmarketcap_instance):
+    # Covers TokenInfoFactory plus the v1/cryptocurrency/map wrapper.
+    # Also a regression test for the crypto-commons 0.5 migration: the
+    # first_historical_data and last_historical_data fields must be int
+    # unix timestamps, not datetime objects.
+    tokens = coinmarketcap_instance.map(limit=3)
+
+    assert isinstance(tokens, list)
+    assert len(tokens) == 3
+
+    btc = tokens[0]
+    assert btc.id == 1
+    assert btc.symbol == "BTC"
+    assert btc.name == "Bitcoin"
+    assert isinstance(btc.slug, str)
+
+    # The crypto-commons 0.5 contract: dates are unix ints.
+    assert btc.first_historical_data is None or isinstance(btc.first_historical_data, int)
+    assert btc.last_historical_data is None or isinstance(btc.last_historical_data, int)
+
+
+def test_safe_daily_call_limit(coinmarketcap_instance):
+    # Exercises v1/key/info.py via _safe_daily_call_limit. Returns an
+    # approximate per-day budget based on remaining monthly quota and
+    # days until reset. Value depends on account state; just assert it's
+    # a non-negative int.
+    daily_limit = coinmarketcap_instance.safe_daily_call_limit()
+    assert isinstance(daily_limit, int)
+    assert daily_limit >= 0
