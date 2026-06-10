@@ -1,6 +1,13 @@
-from typing import Dict
-from datetime import datetime
+from typing import Dict, Optional
+from dateutil import parser
 from crypto_commons.types.token_info import TokenInfo
+
+
+def _iso_to_unix(value: Optional[str]) -> Optional[int]:
+    if value is None:
+        return None
+    return int(parser.parse(value).timestamp())
+
 
 class TokenInfoFactory:
     @staticmethod
@@ -14,7 +21,7 @@ class TokenInfoFactory:
             slug=data['slug'],
             is_active=data.get('is_active'),
             status=data.get('status'),
-            first_historical_data=datetime.fromisoformat(data['first_historical_data'].replace('Z', '+00:00')) if 'first_historical_data' in data else None,
-            last_historical_data=datetime.fromisoformat(data['last_historical_data'].replace('Z', '+00:00')) if 'last_historical_data' in data else None,
+            first_historical_data=_iso_to_unix(data.get('first_historical_data')),
+            last_historical_data=_iso_to_unix(data.get('last_historical_data')),
             platform=data.get('platform')
-        ) 
+        )

@@ -1,4 +1,5 @@
 from typing import Dict
+from dateutil import parser
 from crypto_commons.types.token_state import TokenState
 from .quote_factory import QuoteFactory
 
@@ -27,9 +28,14 @@ class TokenStateFactory:
             quote_map[currency] = QuoteFactory.from_dict(currency, dct_quote_data)
         data['quote_map'] = quote_map
 
-        # Remap date_added to creation_date
+        # Remap date_added to creation_date (CMC returns ISO 8601 string -> unix int)
         if 'date_added' in data:
-            data['creation_date'] = data.pop('date_added')
+            date_added = data.pop('date_added')
+            data['creation_date'] = int(parser.parse(date_added).timestamp()) if date_added else None
+
+        # Convert last_updated from ISO 8601 string to unix int
+        if 'last_updated' in data and isinstance(data['last_updated'], str):
+            data['last_updated'] = int(parser.parse(data['last_updated']).timestamp())
 
         # Set optional attributes to None if not present in the data
         optional_fields = [

@@ -34,7 +34,7 @@ class QuoteFactory:
         dct_quote_data.pop('last_updated', None)
         dct_quote_data.pop('timestamp', None)
 
-        last_updated = parser.parse(last_updated_str)
+        last_updated = int(parser.parse(last_updated_str).timestamp())
         
         # Filter out unknown fields to prevent crashes when CoinMarketCap adds new response fields
         known_fields = {f.name for f in dataclasses.fields(Quote)}

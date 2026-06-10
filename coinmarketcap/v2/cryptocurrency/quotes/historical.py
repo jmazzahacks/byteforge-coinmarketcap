@@ -113,16 +113,16 @@ def _quotes_historical_v2(market,
 	# for each quote block, we can create a token state
 	for dct_quote_block in lst_quotes:
 
-		# Parse the timestamp string into a datetime object
-		timestamp_dt = parser.parse(dct_quote_block['timestamp'])
+		# Parse the timestamp string and convert to unix int
+		timestamp_unix = int(parser.parse(dct_quote_block['timestamp']).timestamp())
 
 		# create a token state, the quotes are empty for now
 		token_state = TokenState(
 			id=id,
 			name=name,
 			symbol=symbol,
-			last_updated=timestamp_dt,
-			timestamp=int(timestamp_dt.timestamp()),
+			last_updated=timestamp_unix,
+			timestamp=timestamp_unix,
 			is_active=is_active,
 			quote_map={},
 			is_fiat=is_fiat)

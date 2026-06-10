@@ -1,5 +1,4 @@
 import pytest
-from datetime import datetime
 import os
 import time
 from coinmarketcap.v3.cryptocurrency.quotes.historical_v3 import _quotes_historical_v3
@@ -39,7 +38,7 @@ def test_cryptocurrency_quotes_historical_with_id(coinmarketcap_instance):
     assert isinstance(token_state.id, int)
     assert isinstance(token_state.name, str)
     assert isinstance(token_state.symbol, str)
-    assert isinstance(token_state.last_updated, datetime)
+    assert isinstance(token_state.last_updated, int)
     assert isinstance(token_state.timestamp, int)
     assert isinstance(token_state.is_active, bool)
     assert isinstance(token_state.is_fiat, bool)
@@ -54,7 +53,7 @@ def test_cryptocurrency_quotes_historical_with_id(coinmarketcap_instance):
     assert isinstance(quote.percent_change_24h, float)
     assert isinstance(quote.percent_change_7d, float)
     assert isinstance(quote.market_cap, float)
-    assert isinstance(quote.last_updated, datetime)
+    assert isinstance(quote.last_updated, int)
 
     # Check the attributes of the BTC quote
     quote = token_state.quote_map['BTC']
@@ -64,7 +63,7 @@ def test_cryptocurrency_quotes_historical_with_id(coinmarketcap_instance):
     assert isinstance(quote.percent_change_24h, float)
     assert isinstance(quote.percent_change_7d, float)
     assert isinstance(quote.market_cap, float)
-    assert isinstance(quote.last_updated, datetime)
+    assert isinstance(quote.last_updated, int)
 
 
 def test_cryptocurrency_quotes_historical_with_ticker(coinmarketcap_instance):
@@ -90,7 +89,7 @@ def test_cryptocurrency_quotes_historical_with_ticker(coinmarketcap_instance):
     assert isinstance(token_state.id, int)
     assert isinstance(token_state.name, str)
     assert isinstance(token_state.symbol, str)
-    assert isinstance(token_state.last_updated, datetime)
+    assert isinstance(token_state.last_updated, int)
     assert isinstance(token_state.timestamp, int)
     assert isinstance(token_state.is_active, bool)
     assert isinstance(token_state.is_fiat, bool)
@@ -104,7 +103,7 @@ def test_cryptocurrency_quotes_historical_with_ticker(coinmarketcap_instance):
     assert isinstance(quote.percent_change_24h, float)
     assert isinstance(quote.percent_change_7d, float)
     assert isinstance(quote.market_cap, float)
-    assert isinstance(quote.last_updated, datetime)
+    assert isinstance(quote.last_updated, int)
 
     # Check the attributes of the BTC quote
     quote = token_state.quote_map['BTC']
@@ -114,7 +113,7 @@ def test_cryptocurrency_quotes_historical_with_ticker(coinmarketcap_instance):
     assert isinstance(quote.percent_change_24h, float)
     assert isinstance(quote.percent_change_7d, float)
     assert isinstance(quote.market_cap, float)
-    assert isinstance(quote.last_updated, datetime)
+    assert isinstance(quote.last_updated, int)
 
 
 def test_listings_latest(coinmarketcap_instance):
