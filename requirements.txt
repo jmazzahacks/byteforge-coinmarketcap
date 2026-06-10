@@ -1,8 +1,5 @@
 requests
 requests-cache
-pytest
 python-dateutil
 requests-ratelimiter
-build
-twine
 byteforge-crypto-commons>=0.5
