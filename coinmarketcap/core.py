@@ -13,7 +13,9 @@ from requests_ratelimiter import LimiterAdapter
 from .v1.cryptocurrency.map import ListingStatus
 from crypto_commons.types.token_state import TokenState
 from crypto_commons.types.token_info import TokenInfo
+from crypto_commons.types.cryptocurrency_info import CryptocurrencyInfo
 from .v2.cryptocurrency.quotes.historical import _quotes_historical_v2
+from .v2.cryptocurrency.info import _cryptocurrency_info
 from .v3.cryptocurrency.quotes.historical_v3 import _quotes_historical_v3
 from .v1.cryptocurrency.listings.latest import _listings_latest
 from .v1.cryptocurrency.listings.common import SortOption, AuxFields, SortDir, FilterOptions
@@ -248,6 +250,20 @@ class Market(object):
 				till the reset date and a monthly limit.
 		"""		
 		return _safe_daily_call_limit(self)
+
+	def cryptocurrency_info(self,
+						ids: Optional[List[int]] = None,
+						slugs: Optional[List[str]] = None,
+						aux: Optional[List[str]] = None) -> Dict[int, CryptocurrencyInfo]:
+		"""Fetch rich token metadata from CMC's /v2/cryptocurrency/info endpoint.
+
+		Returns a dict keyed by CMC ID, with CryptocurrencyInfo values containing
+		name, symbol, slug, description, logo, tags, platform (with on-chain
+		contract address for cross-chain tokens), and URLs. Exactly one of
+		(ids, slugs) must be provided; both batch up to 100 items per call.
+		See _cryptocurrency_info for full docs.
+		"""
+		return _cryptocurrency_info(self, ids=ids, slugs=slugs, aux=aux)
 
 	def dex_listings_info(self,
 						 ids: Union[int, List[int]],

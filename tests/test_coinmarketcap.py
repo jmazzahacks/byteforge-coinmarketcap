@@ -247,3 +247,42 @@ def test_quotes_historical_v3_implementation(coinmarketcap_instance):
             id="1",
             convert=['USD', 'BTC', 'EUR', 'JPY']
         )
+
+
+def test_cryptocurrency_info(coinmarketcap_instance):
+    # BTC (id=1) and ETH (id=1027) — both native L1, platform should be None
+    info_map = coinmarketcap_instance.cryptocurrency_info(ids=[1, 1027])
+
+    assert isinstance(info_map, dict)
+    assert set(info_map.keys()) == {1, 1027}
+
+    btc = info_map[1]
+    assert btc.id == 1
+    assert btc.symbol == "BTC"
+    assert btc.name == "Bitcoin"
+    assert btc.platform is None
+    assert isinstance(btc.description, str) and len(btc.description) > 0
+    assert isinstance(btc.date_added, int)
+    assert btc.tags  # established token has tags
+
+    eth = info_map[1027]
+    assert eth.symbol == "ETH"
+    assert eth.platform is None
+
+    # USDC (id=3408) — ERC-20, platform should be populated with contract address
+    usdc_map = coinmarketcap_instance.cryptocurrency_info(ids=[3408])
+    usdc = usdc_map[3408]
+    assert usdc.platform is not None
+    assert usdc.platform.symbol == "ETH"
+    assert usdc.platform.token_address.startswith("0x")
+
+
+def test_cryptocurrency_info_validation(coinmarketcap_instance):
+    with pytest.raises(ValueError, match="Exactly one of"):
+        coinmarketcap_instance.cryptocurrency_info()
+
+    with pytest.raises(ValueError, match="Exactly one of"):
+        coinmarketcap_instance.cryptocurrency_info(ids=[1], slugs=["bitcoin"])
+
+    with pytest.raises(ValueError, match="up to 100 IDs"):
+        coinmarketcap_instance.cryptocurrency_info(ids=list(range(101)))
