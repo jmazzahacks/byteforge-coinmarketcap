@@ -1,27 +1,16 @@
 import pytest
-import os
 import time
 from coinmarketcap.v3.cryptocurrency.quotes.historical_v3 import _quotes_historical_v3
-from coinmarketcap import Market
-from crypto_commons.types.quote import Quote
 from coinmarketcap.v1.cryptocurrency.listings.common import SortOption, AuxFields, SortDir, FilterOptions
 
-@pytest.fixture
-def coinmarketcap_instance():
-    # You can initialize your CoinMarketCap instance with your API key here if needed
-    api_key = "***REDACTED***"
-    coinmarketcap_instance = Market(api_key=api_key, debug_mode=True)
-    yield coinmarketcap_instance
 
-
-
-def test_cryptocurrency_quotes_historical_with_id(coinmarketcap_instance):
+def test_cryptocurrency_quotes_historical_with_id(market_instance):
 
     timestamp_now = int(time.time())
     timestamp_1_day_ago = timestamp_now - 60*60*24
 
     # Make the API call
-    token_states = coinmarketcap_instance.quotes_historical(
+    token_states = market_instance.quotes_historical(
         id="1",
         timestamp_start=timestamp_1_day_ago,
         timestamp_end=timestamp_now,
@@ -66,13 +55,13 @@ def test_cryptocurrency_quotes_historical_with_id(coinmarketcap_instance):
     assert isinstance(quote.last_updated, int)
 
 
-def test_cryptocurrency_quotes_historical_with_ticker(coinmarketcap_instance):
+def test_cryptocurrency_quotes_historical_with_ticker(market_instance):
     
     timestamp_now = int(time.time())
     timestamp_1_day_ago = timestamp_now - 60*60*24
     
     # Make the API call
-    token_states = coinmarketcap_instance.quotes_historical(
+    token_states = market_instance.quotes_historical(
         ticker='ETH',
         timestamp_start=timestamp_1_day_ago,
         timestamp_end=timestamp_now,
@@ -116,7 +105,7 @@ def test_cryptocurrency_quotes_historical_with_ticker(coinmarketcap_instance):
     assert isinstance(quote.last_updated, int)
 
 
-def test_listings_latest(coinmarketcap_instance):
+def test_listings_latest(market_instance):
     # Define the filter options
     filter = FilterOptions(
         price_min=10,
@@ -146,7 +135,7 @@ def test_listings_latest(coinmarketcap_instance):
     ]
 
     # Make the API call
-    tokens = coinmarketcap_instance.listings_latest(
+    tokens = market_instance.listings_latest(
         sort_by=SortOption.MARKET_CAP,
         sort_dir=SortDir.DESC,
         convert=['USD'],
@@ -181,7 +170,7 @@ def test_listings_latest(coinmarketcap_instance):
     assert token.tvl_ratio is None or isinstance(token.tvl_ratio, float)
     assert token.is_market_cap_included_in_calc is None or isinstance(token.is_market_cap_included_in_calc, bool)
 
-def test_quotes_historical_v3_implementation(coinmarketcap_instance):
+def test_quotes_historical_v3_implementation(market_instance):
     """Test the internal _quotes_historical_v3 implementation directly."""
     from coinmarketcap.v3.cryptocurrency.quotes.historical_v3 import _quotes_historical_v3
     
@@ -190,7 +179,7 @@ def test_quotes_historical_v3_implementation(coinmarketcap_instance):
     
     # Test with ID
     token_states = _quotes_historical_v3(
-        market=coinmarketcap_instance,
+        market=market_instance,
         id="1",  # Bitcoin
         timestamp_start=timestamp_1_day_ago,
         timestamp_end=timestamp_now,
@@ -212,7 +201,7 @@ def test_quotes_historical_v3_implementation(coinmarketcap_instance):
     
     # Test with ticker
     token_states_ticker = _quotes_historical_v3(
-        market=coinmarketcap_instance,
+        market=market_instance,
         ticker="ETH",
         timestamp_start=timestamp_1_day_ago,
         timestamp_end=timestamp_now,
@@ -231,11 +220,11 @@ def test_quotes_historical_v3_implementation(coinmarketcap_instance):
     
     # Test error cases
     with pytest.raises(ValueError, match="Either id or ticker must be provided"):
-        _quotes_historical_v3(market=coinmarketcap_instance)
+        _quotes_historical_v3(market=market_instance)
     
     with pytest.raises(ValueError, match="The start timestamp occurr before than the end timestamp"):
         _quotes_historical_v3(
-            market=coinmarketcap_instance,
+            market=market_instance,
             id="1",
             timestamp_start=timestamp_now,
             timestamp_end=timestamp_1_day_ago
@@ -243,15 +232,15 @@ def test_quotes_historical_v3_implementation(coinmarketcap_instance):
     
     with pytest.raises(ValueError, match="The convert list must have a maximum of 3 elements"):
         _quotes_historical_v3(
-            market=coinmarketcap_instance,
+            market=market_instance,
             id="1",
             convert=['USD', 'BTC', 'EUR', 'JPY']
         )
 
 
-def test_cryptocurrency_info(coinmarketcap_instance):
+def test_cryptocurrency_info(market_instance):
     # BTC (id=1) and ETH (id=1027) — both native L1, platform should be None
-    info_map = coinmarketcap_instance.cryptocurrency_info(ids=[1, 1027])
+    info_map = market_instance.cryptocurrency_info(ids=[1, 1027])
 
     assert isinstance(info_map, dict)
     assert set(info_map.keys()) == {1, 1027}
@@ -270,30 +259,30 @@ def test_cryptocurrency_info(coinmarketcap_instance):
     assert eth.platform is None
 
     # USDC (id=3408) — ERC-20, platform should be populated with contract address
-    usdc_map = coinmarketcap_instance.cryptocurrency_info(ids=[3408])
+    usdc_map = market_instance.cryptocurrency_info(ids=[3408])
     usdc = usdc_map[3408]
     assert usdc.platform is not None
     assert usdc.platform.symbol == "ETH"
     assert usdc.platform.token_address.startswith("0x")
 
 
-def test_cryptocurrency_info_validation(coinmarketcap_instance):
+def test_cryptocurrency_info_validation(market_instance):
     with pytest.raises(ValueError, match="Exactly one of"):
-        coinmarketcap_instance.cryptocurrency_info()
+        market_instance.cryptocurrency_info()
 
     with pytest.raises(ValueError, match="Exactly one of"):
-        coinmarketcap_instance.cryptocurrency_info(ids=[1], slugs=["bitcoin"])
+        market_instance.cryptocurrency_info(ids=[1], slugs=["bitcoin"])
 
     with pytest.raises(ValueError, match="up to 100 IDs"):
-        coinmarketcap_instance.cryptocurrency_info(ids=list(range(101)))
+        market_instance.cryptocurrency_info(ids=list(range(101)))
 
 
-def test_fear_and_greed_historical(coinmarketcap_instance):
+def test_fear_and_greed_historical(market_instance):
     # Regression test for commit 2689a41 — the endpoint was returning 403
     # from CloudFront due to a leading '/' in the request path that produced
     # a double-slashed URL. If this test ever fails with a 403, check the
     # endpoint path in coinmarketcap/v3/fear_and_greed/historical.py.
-    data = coinmarketcap_instance.fear_and_greed_historical(start=1, limit=5)
+    data = market_instance.fear_and_greed_historical(start=1, limit=5)
 
     assert isinstance(data, list)
     assert len(data) == 5
@@ -306,12 +295,12 @@ def test_fear_and_greed_historical(coinmarketcap_instance):
     assert 0 <= int(first['value']) <= 100
 
 
-def test_map(coinmarketcap_instance):
+def test_map(market_instance):
     # Covers TokenInfoFactory plus the v1/cryptocurrency/map wrapper.
     # Also a regression test for the crypto-commons 0.5 migration: the
     # first_historical_data and last_historical_data fields must be int
     # unix timestamps, not datetime objects.
-    tokens = coinmarketcap_instance.map(limit=3)
+    tokens = market_instance.map(limit=3)
 
     assert isinstance(tokens, list)
     assert len(tokens) == 3
@@ -327,11 +316,11 @@ def test_map(coinmarketcap_instance):
     assert btc.last_historical_data is None or isinstance(btc.last_historical_data, int)
 
 
-def test_safe_daily_call_limit(coinmarketcap_instance):
+def test_safe_daily_call_limit(market_instance):
     # Exercises v1/key/info.py via _safe_daily_call_limit. Returns an
     # approximate per-day budget based on remaining monthly quota and
     # days until reset. Value depends on account state; just assert it's
     # a non-negative int.
-    daily_limit = coinmarketcap_instance.safe_daily_call_limit()
+    daily_limit = market_instance.safe_daily_call_limit()
     assert isinstance(daily_limit, int)
     assert daily_limit >= 0

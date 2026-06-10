@@ -27,7 +27,7 @@ class DexInfo:
     slug: str
     logo: Optional[str] = None
     description: Optional[str] = None
-    date_launched: Optional[str] = None
+    date_launched: Optional[int] = None  # unix timestamp
     notice: Optional[str] = None
     status: Optional[str] = None
     urls: Optional[DexUrls] = None

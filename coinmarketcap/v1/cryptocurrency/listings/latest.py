@@ -22,11 +22,10 @@ def _listings_latest(market,
 	}
 
 	# validate convert
-	if (len(convert) > 3):
+	if len(convert) > 3:
 		raise ValueError('The convert list must have a maximum of 3 elements')
-		
-	if convert:
-		params['convert'] = ','.join(convert)
+
+	params['convert'] = ','.join(convert)
 
 	if aux_fields:
 		# Include the "aux" fields in the params

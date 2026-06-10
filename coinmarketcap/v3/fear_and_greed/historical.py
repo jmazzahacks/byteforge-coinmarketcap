@@ -1,10 +1,5 @@
-from typing import List, Optional, Dict, Union
-import time
-from pprint import pprint
+from typing import Dict, List, Union
 
-
-from coinmarketcap.v1.cryptocurrency.listings.common import _validate_interval
-from coinmarketcap.types.quote_factory import QuoteFactory
 
 def _fear_and_greed_historical(market, start: int = 1, limit: int = 500) -> List[Dict[str, Union[str, int]]]:
 	"""

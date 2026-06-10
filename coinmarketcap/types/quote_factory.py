@@ -8,8 +8,12 @@ from crypto_commons.types.quote import Quote
 class QuoteFactory:
     @staticmethod
     def from_dict(currency: str, dct_quote_data: Dict) -> 'Quote':
+        # Don't mutate caller's dict — we pop/overwrite several keys below.
+        dct_quote_data = dct_quote_data.copy()
+
         if 'price' not in dct_quote_data:
-            print(f"Payload: {json.dumps(dct_quote_data, indent=4)}")
+            logging.warning("Quote payload missing 'price' field: %s",
+                            json.dumps(dct_quote_data)[:500])
             raise ValueError("Payload must contain 'price' field.")
 
         # insure integers are handled as floats (so 1 becomes 1.0)

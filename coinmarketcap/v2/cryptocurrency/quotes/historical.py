@@ -20,10 +20,10 @@ from coinmarketcap.types.quote_factory import QuoteFactory
 def _quotes_historical_v2(market,
 						  id: Optional[str] = None,
 						  ticker: Optional[str] = None,
-						  timestamp_start: Optional[int] = int(time.time()) - 60*60*24,
-						  timestamp_end: Optional[int] = int(time.time()),
+						  timestamp_start: Optional[int] = None,
+						  timestamp_end: Optional[int] = None,
 						  interval: str = 'hourly',
-						  convert: List[str] = ['USD']) -> List[TokenState]:
+						  convert: Optional[List[str]] = None) -> List[TokenState]:
 	"""
 	Retrieves historical price quotes for a cryptocurrency from the CoinMarketCap API.
 	
@@ -51,6 +51,15 @@ def _quotes_historical_v2(market,
 	"""
 	if not id and not ticker:
 		raise ValueError('Either id or ticker must be provided')
+
+	# Resolve defaults at call time, not import time.
+	now = int(time.time())
+	if timestamp_end is None:
+		timestamp_end = now
+	if timestamp_start is None:
+		timestamp_start = timestamp_end - 60*60*24
+	if convert is None:
+		convert = ['USD']
 
 	# Check if the start timestamp is greater than the end timestamp
 	if timestamp_start > timestamp_end:

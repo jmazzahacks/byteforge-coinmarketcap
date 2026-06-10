@@ -27,7 +27,6 @@ def _map(market,
          sort: MapSortOption = MapSortOption.ID, 
          aux_fields: List[MapAuxFields] = None):
 
-    # quick and dirty test
     params = dict()
     params['listing_status'] = status.value
     params['start'] = start

@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 import logging
 import requests
@@ -108,7 +107,9 @@ class Market(object):
 		return self._session
 	
 
-	def _request(self, endpoint, params = {}, no_cache = False):
+	def _request(self, endpoint, params=None, no_cache=False):
+		if params is None:
+			params = {}
 		url = self.base_url.rstrip('/') + '/' + endpoint.lstrip('/')
 
 		if self._debug_mode:
@@ -193,11 +194,19 @@ class Market(object):
 	def quotes_historical(self,
 						  id: Optional[str] = None,
 						  ticker: Optional[str] = None,
-						  timestamp_start: Optional[int] = int(time.time()) - 60*60*24,
-						  timestamp_end: Optional[int] = int(time.time()),
+						  timestamp_start: Optional[int] = None,
+						  timestamp_end: Optional[int] = None,
 						  interval: str = 'hourly',
-						  convert: List[str] = ['USD']) -> List[TokenState]:
-		
+						  convert: Optional[List[str]] = None) -> List[TokenState]:
+		# Resolve time-window defaults at call time, not import time.
+		now = int(time.time())
+		if timestamp_end is None:
+			timestamp_end = now
+		if timestamp_start is None:
+			timestamp_start = timestamp_end - 60*60*24
+		if convert is None:
+			convert = ['USD']
+
 		return _quotes_historical_v2(self,
 							   id=id,
 							   ticker=ticker,
@@ -205,16 +214,24 @@ class Market(object):
 							   timestamp_end=timestamp_end,
 							   interval=interval,
 							   convert=convert)
-	
-	
+
+
 	def quotes_historical_v3(self,
 						  id: Optional[str] = None,
 						  ticker: Optional[str] = None,
-						  timestamp_start: Optional[int] = int(time.time()) - 60*60*24,
-						  timestamp_end: Optional[int] = int(time.time()),
+						  timestamp_start: Optional[int] = None,
+						  timestamp_end: Optional[int] = None,
 						  interval: str = 'hourly',
-						  convert: List[str] = ['USD']) -> List[TokenState]:
-		
+						  convert: Optional[List[str]] = None) -> List[TokenState]:
+		# Resolve time-window defaults at call time, not import time.
+		now = int(time.time())
+		if timestamp_end is None:
+			timestamp_end = now
+		if timestamp_start is None:
+			timestamp_start = timestamp_end - 60*60*24
+		if convert is None:
+			convert = ['USD']
+
 		return _quotes_historical_v3(self,
 							   id=id,
 							   ticker=ticker,
@@ -223,14 +240,15 @@ class Market(object):
 							   interval=interval,
 							   convert=convert)
 
-	def listings_latest(self, sort_by: SortOption = SortOption.MARKET_CAP, 
-					sort_dir: SortDir = SortDir.DESC, 
-					start: int = 1, 
-					limit: int = 100, 
-					convert: List[str] = ['USD'],
-					aux_fields: AuxFields = None, 
+	def listings_latest(self, sort_by: SortOption = SortOption.MARKET_CAP,
+					sort_dir: SortDir = SortDir.DESC,
+					start: int = 1,
+					limit: int = 100,
+					convert: Optional[List[str]] = None,
+					aux_fields: AuxFields = None,
 					filters: FilterOptions = None) -> List[TokenState]:
-		
+		if convert is None:
+			convert = ['USD']
 		return _listings_latest(self, sort_by, sort_dir, start, limit, convert, aux_fields, filters)
 	
 
