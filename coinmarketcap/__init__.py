@@ -3,10 +3,10 @@
 
 from importlib.metadata import version, PackageNotFoundError
 
-__title__ = 'coinmarketcap'
-__author__ = 'Jason Byteforge'
-__repo__ = 'https://github.com/jmazzahacks/byteforge-coinmarketcap'
-__license__ = 'Apache License 2.0'
+__title__ = "coinmarketcap"
+__author__ = "Jason Byteforge"
+__repo__ = "https://github.com/jmazzahacks/byteforge-coinmarketcap"
+__license__ = "Apache License 2.0"
 
 try:
     __version__ = version("byteforge-coinmarketcap")

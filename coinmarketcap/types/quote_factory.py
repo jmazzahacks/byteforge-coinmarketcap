@@ -5,41 +5,46 @@ import logging
 from dateutil import parser
 from crypto_commons.types.quote import Quote
 
+
 class QuoteFactory:
     @staticmethod
-    def from_dict(currency: str, dct_quote_data: Dict) -> 'Quote':
+    def from_dict(currency: str, dct_quote_data: Dict) -> "Quote":
         # Don't mutate caller's dict — we pop/overwrite several keys below.
         dct_quote_data = dct_quote_data.copy()
 
-        if 'price' not in dct_quote_data:
-            logging.warning("Quote payload missing 'price' field: %s",
-                            json.dumps(dct_quote_data)[:500])
+        if "price" not in dct_quote_data:
+            logging.warning(
+                "Quote payload missing 'price' field: %s",
+                json.dumps(dct_quote_data)[:500],
+            )
             raise ValueError("Payload must contain 'price' field.")
 
         # insure integers are handled as floats (so 1 becomes 1.0)
-        dct_quote_data['price'] = float(dct_quote_data['price'])
+        dct_quote_data["price"] = float(dct_quote_data["price"])
 
         # convert market_cap to float, if it's not a float, set it to -1.0
         try:
-            dct_quote_data['market_cap'] = float(dct_quote_data['market_cap'])
+            dct_quote_data["market_cap"] = float(dct_quote_data["market_cap"])
         except TypeError as e:
             logging.warning(f"Error converting market_cap to float: {e}")
-            dct_quote_data['market_cap'] = 0.0
+            dct_quote_data["market_cap"] = 0.0
 
         # Handle both 'last_updated' and 'timestamp' for the last_updated field
-        if 'last_updated' in dct_quote_data:
-            last_updated_str = dct_quote_data['last_updated']
-        elif 'timestamp' in dct_quote_data:
-            last_updated_str = dct_quote_data['timestamp']
+        if "last_updated" in dct_quote_data:
+            last_updated_str = dct_quote_data["last_updated"]
+        elif "timestamp" in dct_quote_data:
+            last_updated_str = dct_quote_data["timestamp"]
         else:
-            raise ValueError("Payload must contain either 'last_updated' or 'timestamp' field.")
+            raise ValueError(
+                "Payload must contain either 'last_updated' or 'timestamp' field."
+            )
 
         # Remove both possible keys to avoid errors in the constructor
-        dct_quote_data.pop('last_updated', None)
-        dct_quote_data.pop('timestamp', None)
+        dct_quote_data.pop("last_updated", None)
+        dct_quote_data.pop("timestamp", None)
 
         last_updated = int(parser.parse(last_updated_str).timestamp())
-        
+
         # Filter out unknown fields to prevent crashes when CoinMarketCap adds new response fields
         known_fields = {f.name for f in dataclasses.fields(Quote)}
         filtered = {k: v for k, v in dct_quote_data.items() if k in known_fields}

@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from typing import Optional, Dict, List
 
+
 @dataclass
 class DexUrls:
     """URLs associated with a DEX"""
+
     website: Optional[List[str]] = None
     twitter: Optional[List[str]] = None
     blog: Optional[List[str]] = None
@@ -17,6 +19,7 @@ class DexUrls:
         self.blog = self.blog or []
         self.chat = self.chat or []
         self.fee = self.fee or []
+
 
 @dataclass
 class DexInfo:

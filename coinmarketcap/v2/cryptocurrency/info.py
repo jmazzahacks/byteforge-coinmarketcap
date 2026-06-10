@@ -35,15 +35,15 @@ def _cryptocurrency_info(
     if ids is not None:
         if len(ids) > 100:
             raise ValueError("CMC info endpoint accepts up to 100 IDs per call")
-        params['id'] = ','.join(str(i) for i in ids)
+        params["id"] = ",".join(str(i) for i in ids)
     elif slugs is not None:
-        params['slug'] = ','.join(slugs)
+        params["slug"] = ",".join(slugs)
 
     if aux is not None:
-        params['aux'] = ','.join(aux)
+        params["aux"] = ",".join(aux)
 
-    response = market._request('v2/cryptocurrency/info', params=params, no_cache=True)
-    raw_data = response.get('data', {})
+    response = market._request("v2/cryptocurrency/info", params=params, no_cache=True)
+    raw_data = response.get("data", {})
 
     result: Dict[int, CryptocurrencyInfo] = {}
     for cmc_id_str, token_data in raw_data.items():

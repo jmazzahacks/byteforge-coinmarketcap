@@ -17,13 +17,19 @@ from .v2.cryptocurrency.quotes.historical import _quotes_historical_v2
 from .v2.cryptocurrency.info import _cryptocurrency_info
 from .v3.cryptocurrency.quotes.historical_v3 import _quotes_historical_v3
 from .v1.cryptocurrency.listings.latest import _listings_latest
-from .v1.cryptocurrency.listings.common import SortOption, AuxFields, SortDir, FilterOptions
+from .v1.cryptocurrency.listings.common import (
+    SortOption,
+    AuxFields,
+    SortDir,
+    FilterOptions,
+)
 from .v1.key.info import _key_info
 from .v1.key.info import _safe_daily_call_limit
 from .v1.cryptocurrency.map import _map, MapSortOption, MapAuxFields
 from .v3.fear_and_greed.historical import _fear_and_greed_historical
 from .v4.dex.listings.info import _dex_listings_info, DexAuxFields
 from .types.dex_info import DexInfo, DexUrls
+
 
 class ServerException(Exception):
     def __init__(self, status_code: int, message: str):
@@ -41,281 +47,323 @@ class MalformedResponseError(Exception):
 
 class Market(object):
 
-	_session = None
-	_caching_session = None
-	_debug_mode = False
-	_api_key = None
-	_limiter = None
-	__DEFAULT_BASE_URL = 'https://pro-api.coinmarketcap.com/'
-	__DEFAULT_TIMEOUT = 30
-	__TEMPDIR_CACHE = True
+    _session = None
+    _caching_session = None
+    _debug_mode = False
+    _api_key = None
+    _limiter = None
+    __DEFAULT_BASE_URL = "https://pro-api.coinmarketcap.com/"
+    __DEFAULT_TIMEOUT = 30
+    __TEMPDIR_CACHE = True
 
-	def __init__(self, api_key = None, 
-			  base_url = __DEFAULT_BASE_URL, 
-			  request_timeout = __DEFAULT_TIMEOUT, 
-			  tempdir_cache = __TEMPDIR_CACHE,
-			  rate_limit_per_minute = -1,
-			  debug_mode = False):
-		
-		self._api_key = api_key
-		self.base_url = base_url
-		self.request_timeout = request_timeout
-		self._debug_mode = debug_mode
-		self.cache_filename = 'coinmarketcap_cache'
-		self.cache_name = os.path.join(tempfile.gettempdir(), self.cache_filename) if tempdir_cache else self.cache_filename
-		
-		if not self._api_key:
-			raise ValueError('An API key is required for using the coinmarketcap API. Please visit https://pro.coinmarketcap.com/signup/ for more information.')
-		
-		if rate_limit_per_minute > 0:
-			self._limiter = LimiterAdapter(per_minute=rate_limit_per_minute)
+    def __init__(
+        self,
+        api_key=None,
+        base_url=__DEFAULT_BASE_URL,
+        request_timeout=__DEFAULT_TIMEOUT,
+        tempdir_cache=__TEMPDIR_CACHE,
+        rate_limit_per_minute=-1,
+        debug_mode=False,
+    ):
 
-	@property
-	def caching_session(self):
-		if not self._caching_session:
-			# define a a session with caching
-			self._caching_session = requests_cache.CachedSession(
-			 	cache_name=self.cache_name,
-			 	backend='sqlite', 
-			 	expire_after=120)
-			
-			if self._limiter:
-				self._caching_session.mount('https://', self._limiter)
-			
-			self._caching_session.headers.update({
-					'Accept': 'application/json',
-				  	'X-CMC_PRO_API_KEY': self._api_key,
-				})
+        self._api_key = api_key
+        self.base_url = base_url
+        self.request_timeout = request_timeout
+        self._debug_mode = debug_mode
+        self.cache_filename = "coinmarketcap_cache"
+        self.cache_name = (
+            os.path.join(tempfile.gettempdir(), self.cache_filename)
+            if tempdir_cache
+            else self.cache_filename
+        )
 
-		return self._caching_session
+        if not self._api_key:
+            raise ValueError(
+                "An API key is required for using the coinmarketcap API. Please visit https://pro.coinmarketcap.com/signup/ for more information."
+            )
 
-	@property
-	def session(self):
-		if not self._session:
-		
-			# and a normal (non-caching) session
-			self._session = requests.Session()
+        if rate_limit_per_minute > 0:
+            self._limiter = LimiterAdapter(per_minute=rate_limit_per_minute)
 
-			self._session.headers.update({
-					'Accept': 'application/json',
-				  	'X-CMC_PRO_API_KEY': self._api_key,
-				})
-			
-			if self._limiter:
-				self._session.mount('https://', self._limiter)
-			
-		return self._session
-	
+    @property
+    def caching_session(self):
+        if not self._caching_session:
+            # define a a session with caching
+            self._caching_session = requests_cache.CachedSession(
+                cache_name=self.cache_name, backend="sqlite", expire_after=120
+            )
 
-	def _request(self, endpoint, params=None, no_cache=False):
-		if params is None:
-			params = {}
-		url = self.base_url.rstrip('/') + '/' + endpoint.lstrip('/')
+            if self._limiter:
+                self._caching_session.mount("https://", self._limiter)
 
-		if self._debug_mode:
-			print('Request URL: ' + url)
-			if params:
-				print("Request Payload:\n" + json.dumps(params, indent=4))
+            self._caching_session.headers.update(
+                {
+                    "Accept": "application/json",
+                    "X-CMC_PRO_API_KEY": self._api_key,
+                }
+            )
 
-		if no_cache:
-			response_object = self.session.get(url, params=params, timeout=self.request_timeout)
-		else:
-			response_object = self.caching_session.get(url, params=params, timeout=self.request_timeout)
+        return self._caching_session
 
-		if self._debug_mode:
-			print('Response Code: ' + str(response_object.status_code))
-			if hasattr(response_object, 'from_cache'):
-				print('From Cache?: ' + str(response_object.from_cache))
+    @property
+    def session(self):
+        if not self._session:
 
-		if response_object.status_code != requests.codes.ok:
-			raise ServerException(response_object.status_code, response_object.text)
+            # and a normal (non-caching) session
+            self._session = requests.Session()
 
-		try:
-			response_json = response_object.json()
-		except (json.JSONDecodeError, ValueError):
-			logging.error("Non-JSON response from %s: %s", endpoint, response_object.text[:500])
-			raise MalformedResponseError(endpoint, "Response is not valid JSON", response_object.text[:500])
+            self._session.headers.update(
+                {
+                    "Accept": "application/json",
+                    "X-CMC_PRO_API_KEY": self._api_key,
+                }
+            )
 
-		if self._debug_mode:
-			print("Response Payload:\n" + json.dumps(response_json, indent=4))
+            if self._limiter:
+                self._session.mount("https://", self._limiter)
 
-		if 'data' not in response_json:
-			logging.warning("Response from %s missing 'data' key: %s", endpoint, json.dumps(response_json)[:500])
+        return self._session
 
-		return response_json
+    def _request(self, endpoint, params=None, no_cache=False):
+        if params is None:
+            params = {}
+        url = self.base_url.rstrip("/") + "/" + endpoint.lstrip("/")
 
-	def fear_and_greed_historical(self, start: int, limit: int) -> List[Dict[str, Union[str, int]]]:
-		"""
-		Retrieves historical fear and greed index data from the CoinMarketCap API.
+        if self._debug_mode:
+            print("Request URL: " + url)
+            if params:
+                print("Request Payload:\n" + json.dumps(params, indent=4))
 
-		Returns:
-			List[Dict[str, Union[str, int]]]: A list of dictionaries containing:
-				- timestamp (str): Unix timestamp of the measurement
-				- value (int): The fear and greed index value (0-100)
-				- value_classification (str): Classification of the value (e.g., 'Greed', 'Fear', etc.)
-		"""
-		return _fear_and_greed_historical(self, start, limit)
+        if no_cache:
+            response_object = self.session.get(
+                url, params=params, timeout=self.request_timeout
+            )
+        else:
+            response_object = self.caching_session.get(
+                url, params=params, timeout=self.request_timeout
+            )
 
-	def map(self, 
-			listing_status: ListingStatus = ListingStatus.ACTIVE, 
-			start: int = 1,
-			limit: int = 100,
-			symbols: List[str] = None,
-			sort: MapSortOption = MapSortOption.ID,
-			aux_fields: List[MapAuxFields] = None) -> List[TokenInfo]:
-		"""Returns a mapping of all cryptocurrencies to their CoinMarketCap IDs.
+        if self._debug_mode:
+            print("Response Code: " + str(response_object.status_code))
+            if hasattr(response_object, "from_cache"):
+                print("From Cache?: " + str(response_object.from_cache))
 
-		This method provides a mapping of all cryptocurrencies to their CoinMarketCap IDs, 
-		which can be used to make other API calls. The mapping includes basic information 
-		about each cryptocurrency.
+        if response_object.status_code != requests.codes.ok:
+            raise ServerException(response_object.status_code, response_object.text)
 
-		Args:
-			listing_status (ListingStatus, optional): Filter by listing status. 
-				Can be ACTIVE, INACTIVE, or UNTRACKED. Defaults to ACTIVE.
-			start (int, optional): Starting point for pagination. Defaults to 1.
-			limit (int, optional): Number of results to return. Defaults to 100.
-			symbols (List[str], optional): List of cryptocurrency symbols to filter by. 
-				If None, returns all cryptocurrencies. Defaults to None.
-			sort (MapSortOption, optional): Field to sort results by. Can be ID or CMC_RANK. 
-				Defaults to ID.
-			aux_fields (List[MapAuxFields], optional): Additional fields to include in response. 
-				Can include PLATFORM, FIRST_HISTORICAL_DATA, LAST_HISTORICAL_DATA, IS_ACTIVE. 
-				Defaults to None.
+        try:
+            response_json = response_object.json()
+        except (json.JSONDecodeError, ValueError):
+            logging.error(
+                "Non-JSON response from %s: %s", endpoint, response_object.text[:500]
+            )
+            raise MalformedResponseError(
+                endpoint, "Response is not valid JSON", response_object.text[:500]
+            )
 
-		Returns:
-			List[TokenInfo]: List of TokenInfo objects containing cryptocurrency mapping data.
+        if self._debug_mode:
+            print("Response Payload:\n" + json.dumps(response_json, indent=4))
 
-		Raises:
-			ServerException: If the API request fails.
-		"""
-		
-		return _map(self, listing_status, start, limit, symbols, sort, aux_fields)
+        if "data" not in response_json:
+            logging.warning(
+                "Response from %s missing 'data' key: %s",
+                endpoint,
+                json.dumps(response_json)[:500],
+            )
 
-	def quotes_historical(self,
-						  id: Optional[str] = None,
-						  ticker: Optional[str] = None,
-						  timestamp_start: Optional[int] = None,
-						  timestamp_end: Optional[int] = None,
-						  interval: str = 'hourly',
-						  convert: Optional[List[str]] = None) -> List[TokenState]:
-		# Resolve time-window defaults at call time, not import time.
-		now = int(time.time())
-		if timestamp_end is None:
-			timestamp_end = now
-		if timestamp_start is None:
-			timestamp_start = timestamp_end - 60*60*24
-		if convert is None:
-			convert = ['USD']
+        return response_json
 
-		return _quotes_historical_v2(self,
-							   id=id,
-							   ticker=ticker,
-							   timestamp_start=timestamp_start,
-							   timestamp_end=timestamp_end,
-							   interval=interval,
-							   convert=convert)
+    def fear_and_greed_historical(
+        self, start: int, limit: int
+    ) -> List[Dict[str, Union[str, int]]]:
+        """
+        Retrieves historical fear and greed index data from the CoinMarketCap API.
 
+        Returns:
+                List[Dict[str, Union[str, int]]]: A list of dictionaries containing:
+                        - timestamp (str): Unix timestamp of the measurement
+                        - value (int): The fear and greed index value (0-100)
+                        - value_classification (str): Classification of the value (e.g., 'Greed', 'Fear', etc.)
+        """
+        return _fear_and_greed_historical(self, start, limit)
 
-	def quotes_historical_v3(self,
-						  id: Optional[str] = None,
-						  ticker: Optional[str] = None,
-						  timestamp_start: Optional[int] = None,
-						  timestamp_end: Optional[int] = None,
-						  interval: str = 'hourly',
-						  convert: Optional[List[str]] = None) -> List[TokenState]:
-		# Resolve time-window defaults at call time, not import time.
-		now = int(time.time())
-		if timestamp_end is None:
-			timestamp_end = now
-		if timestamp_start is None:
-			timestamp_start = timestamp_end - 60*60*24
-		if convert is None:
-			convert = ['USD']
+    def map(
+        self,
+        listing_status: ListingStatus = ListingStatus.ACTIVE,
+        start: int = 1,
+        limit: int = 100,
+        symbols: List[str] = None,
+        sort: MapSortOption = MapSortOption.ID,
+        aux_fields: List[MapAuxFields] = None,
+    ) -> List[TokenInfo]:
+        """Returns a mapping of all cryptocurrencies to their CoinMarketCap IDs.
 
-		return _quotes_historical_v3(self,
-							   id=id,
-							   ticker=ticker,
-							   timestamp_start=timestamp_start,
-							   timestamp_end=timestamp_end,
-							   interval=interval,
-							   convert=convert)
+        This method provides a mapping of all cryptocurrencies to their CoinMarketCap IDs,
+        which can be used to make other API calls. The mapping includes basic information
+        about each cryptocurrency.
 
-	def listings_latest(self, sort_by: SortOption = SortOption.MARKET_CAP,
-					sort_dir: SortDir = SortDir.DESC,
-					start: int = 1,
-					limit: int = 100,
-					convert: Optional[List[str]] = None,
-					aux_fields: AuxFields = None,
-					filters: FilterOptions = None) -> List[TokenState]:
-		if convert is None:
-			convert = ['USD']
-		return _listings_latest(self, sort_by, sort_dir, start, limit, convert, aux_fields, filters)
-	
+        Args:
+                listing_status (ListingStatus, optional): Filter by listing status.
+                        Can be ACTIVE, INACTIVE, or UNTRACKED. Defaults to ACTIVE.
+                start (int, optional): Starting point for pagination. Defaults to 1.
+                limit (int, optional): Number of results to return. Defaults to 100.
+                symbols (List[str], optional): List of cryptocurrency symbols to filter by.
+                        If None, returns all cryptocurrencies. Defaults to None.
+                sort (MapSortOption, optional): Field to sort results by. Can be ID or CMC_RANK.
+                        Defaults to ID.
+                aux_fields (List[MapAuxFields], optional): Additional fields to include in response.
+                        Can include PLATFORM, FIRST_HISTORICAL_DATA, LAST_HISTORICAL_DATA, IS_ACTIVE.
+                        Defaults to None.
 
-	def safe_daily_call_limit(self):
-		"""
-		Calculates how many API calls are left for today, based on the service plan's monthly call limit.
+        Returns:
+                List[TokenInfo]: List of TokenInfo objects containing cryptocurrency mapping data.
 
-		This function takes the user's API call limit and subtracts the number of calls used to date,
-		providing a simple ratio to estimate daily available calls until the reset date. Note that 
-		this is an approximation based on equal usage each day until the reset.
+        Raises:
+                ServerException: If the API request fails.
+        """
 
-		Parameters:
-			market (Market): An instance of the Market class, which handles the API communications.
+        return _map(self, listing_status, start, limit, symbols, sort, aux_fields)
 
-		Returns:
-			int: Approximate number of API calls left for the current day, based on daily usage 
-				till the reset date and a monthly limit.
-		"""		
-		return _safe_daily_call_limit(self)
+    def quotes_historical(
+        self,
+        id: Optional[str] = None,
+        ticker: Optional[str] = None,
+        timestamp_start: Optional[int] = None,
+        timestamp_end: Optional[int] = None,
+        interval: str = "hourly",
+        convert: Optional[List[str]] = None,
+    ) -> List[TokenState]:
+        # Resolve time-window defaults at call time, not import time.
+        now = int(time.time())
+        if timestamp_end is None:
+            timestamp_end = now
+        if timestamp_start is None:
+            timestamp_start = timestamp_end - 60 * 60 * 24
+        if convert is None:
+            convert = ["USD"]
 
-	def cryptocurrency_info(self,
-						ids: Optional[List[int]] = None,
-						slugs: Optional[List[str]] = None,
-						aux: Optional[List[str]] = None) -> Dict[int, CryptocurrencyInfo]:
-		"""Fetch rich token metadata from CMC's /v2/cryptocurrency/info endpoint.
+        return _quotes_historical_v2(
+            self,
+            id=id,
+            ticker=ticker,
+            timestamp_start=timestamp_start,
+            timestamp_end=timestamp_end,
+            interval=interval,
+            convert=convert,
+        )
 
-		Returns a dict keyed by CMC ID, with CryptocurrencyInfo values containing
-		name, symbol, slug, description, logo, tags, platform (with on-chain
-		contract address for cross-chain tokens), and URLs. Exactly one of
-		(ids, slugs) must be provided; both batch up to 100 items per call.
-		See _cryptocurrency_info for full docs.
-		"""
-		return _cryptocurrency_info(self, ids=ids, slugs=slugs, aux=aux)
+    def quotes_historical_v3(
+        self,
+        id: Optional[str] = None,
+        ticker: Optional[str] = None,
+        timestamp_start: Optional[int] = None,
+        timestamp_end: Optional[int] = None,
+        interval: str = "hourly",
+        convert: Optional[List[str]] = None,
+    ) -> List[TokenState]:
+        # Resolve time-window defaults at call time, not import time.
+        now = int(time.time())
+        if timestamp_end is None:
+            timestamp_end = now
+        if timestamp_start is None:
+            timestamp_start = timestamp_end - 60 * 60 * 24
+        if convert is None:
+            convert = ["USD"]
 
-	def dex_listings_info(self,
-						 ids: Union[int, List[int]],
-						 aux_fields: Optional[List[DexAuxFields]] = None) -> List[DexInfo]:
-		"""
-		Get information about specific DEX (Decentralized Exchanges) by their IDs.
+        return _quotes_historical_v3(
+            self,
+            id=id,
+            ticker=ticker,
+            timestamp_start=timestamp_start,
+            timestamp_end=timestamp_end,
+            interval=interval,
+            convert=convert,
+        )
 
-		This method retrieves detailed information about specific decentralized exchanges
-		from the CoinMarketCap API. Unlike other listings endpoints, this requires specific
-		DEX IDs and does not support pagination, sorting, or filtering.
+    def listings_latest(
+        self,
+        sort_by: SortOption = SortOption.MARKET_CAP,
+        sort_dir: SortDir = SortDir.DESC,
+        start: int = 1,
+        limit: int = 100,
+        convert: Optional[List[str]] = None,
+        aux_fields: AuxFields = None,
+        filters: FilterOptions = None,
+    ) -> List[TokenState]:
+        if convert is None:
+            convert = ["USD"]
+        return _listings_latest(
+            self, sort_by, sort_dir, start, limit, convert, aux_fields, filters
+        )
 
-		Args:
-			ids (Union[int, List[int]]): Single DEX ID or list of DEX IDs to retrieve
-				information for. At least one ID is required.
-			aux_fields (List[DexAuxFields], optional): Additional fields to include in response.
-				Can include URLS, LOGO, DESCRIPTION, DATE_LAUNCHED, NOTICE.
-				Defaults to None (returns only basic fields: id, name, slug, status).
+    def safe_daily_call_limit(self):
+        """
+        Calculates how many API calls are left for today, based on the service plan's monthly call limit.
 
-		Returns:
-			List[DexInfo]: List of DexInfo objects containing DEX information including
-				ID, name, slug, status, and any requested auxiliary fields.
+        This function takes the user's API call limit and subtracts the number of calls used to date,
+        providing a simple ratio to estimate daily available calls until the reset date. Note that
+        this is an approximation based on equal usage each day until the reset.
 
-		Raises:
-			ValueError: If no IDs are provided.
-			ServerException: If the API request fails.
+        Parameters:
+                market (Market): An instance of the Market class, which handles the API communications.
 
-		Example:
-			# Get info for a single DEX with all auxiliary fields
-			dex_info = market.dex_listings_info(
-				ids=11955,
-				aux_fields=[DexAuxFields.URLS, DexAuxFields.LOGO, DexAuxFields.DESCRIPTION]
-			)
+        Returns:
+                int: Approximate number of API calls left for the current day, based on daily usage
+                        till the reset date and a monthly limit.
+        """
+        return _safe_daily_call_limit(self)
 
-			# Get info for multiple DEXs
-			dex_info = market.dex_listings_info(ids=[11955, 12345])
-		"""
-		return _dex_listings_info(self, ids, aux_fields)
+    def cryptocurrency_info(
+        self,
+        ids: Optional[List[int]] = None,
+        slugs: Optional[List[str]] = None,
+        aux: Optional[List[str]] = None,
+    ) -> Dict[int, CryptocurrencyInfo]:
+        """Fetch rich token metadata from CMC's /v2/cryptocurrency/info endpoint.
+
+        Returns a dict keyed by CMC ID, with CryptocurrencyInfo values containing
+        name, symbol, slug, description, logo, tags, platform (with on-chain
+        contract address for cross-chain tokens), and URLs. Exactly one of
+        (ids, slugs) must be provided; both batch up to 100 items per call.
+        See _cryptocurrency_info for full docs.
+        """
+        return _cryptocurrency_info(self, ids=ids, slugs=slugs, aux=aux)
+
+    def dex_listings_info(
+        self,
+        ids: Union[int, List[int]],
+        aux_fields: Optional[List[DexAuxFields]] = None,
+    ) -> List[DexInfo]:
+        """
+        Get information about specific DEX (Decentralized Exchanges) by their IDs.
+
+        This method retrieves detailed information about specific decentralized exchanges
+        from the CoinMarketCap API. Unlike other listings endpoints, this requires specific
+        DEX IDs and does not support pagination, sorting, or filtering.
+
+        Args:
+                ids (Union[int, List[int]]): Single DEX ID or list of DEX IDs to retrieve
+                        information for. At least one ID is required.
+                aux_fields (List[DexAuxFields], optional): Additional fields to include in response.
+                        Can include URLS, LOGO, DESCRIPTION, DATE_LAUNCHED, NOTICE.
+                        Defaults to None (returns only basic fields: id, name, slug, status).
+
+        Returns:
+                List[DexInfo]: List of DexInfo objects containing DEX information including
+                        ID, name, slug, status, and any requested auxiliary fields.
+
+        Raises:
+                ValueError: If no IDs are provided.
+                ServerException: If the API request fails.
+
+        Example:
+                # Get info for a single DEX with all auxiliary fields
+                dex_info = market.dex_listings_info(
+                        ids=11955,
+                        aux_fields=[DexAuxFields.URLS, DexAuxFields.LOGO, DexAuxFields.DESCRIPTION]
+                )
+
+                # Get info for multiple DEXs
+                dex_info = market.dex_listings_info(ids=[11955, 12345])
+        """
+        return _dex_listings_info(self, ids, aux_fields)

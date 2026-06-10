@@ -3,6 +3,7 @@ import time
 from dateutil import parser
 from .dex_info import DexInfo, DexUrls
 
+
 class DexInfoFactory:
     @staticmethod
     def from_dict(data: Dict) -> DexInfo:
@@ -18,23 +19,31 @@ class DexInfoFactory:
         data = data.copy()
 
         # Add timestamp if not present
-        if 'timestamp' not in data:
-            data['timestamp'] = int(time.time())
+        if "timestamp" not in data:
+            data["timestamp"] = int(time.time())
 
         # Convert date_launched from ISO 8601 string to unix int, matching
         # the rest of the SDK's date-field convention.
-        if 'date_launched' in data and isinstance(data['date_launched'], str):
-            data['date_launched'] = int(parser.parse(data['date_launched']).timestamp())
+        if "date_launched" in data and isinstance(data["date_launched"], str):
+            data["date_launched"] = int(parser.parse(data["date_launched"]).timestamp())
 
         # Process URLs if present
-        if 'urls' in data and isinstance(data['urls'], dict):
-            urls_dict = data.pop('urls')
-            data['urls'] = DexUrls(**urls_dict)
+        if "urls" in data and isinstance(data["urls"], dict):
+            urls_dict = data.pop("urls")
+            data["urls"] = DexUrls(**urls_dict)
 
         # Remove any fields not in the DexInfo model
         valid_fields = {
-            'id', 'name', 'slug', 'logo', 'description',
-            'date_launched', 'notice', 'status', 'urls', 'timestamp'
+            "id",
+            "name",
+            "slug",
+            "logo",
+            "description",
+            "date_launched",
+            "notice",
+            "status",
+            "urls",
+            "timestamp",
         }
 
         # Filter out any extra fields from API response
