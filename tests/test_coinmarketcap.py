@@ -1,21 +1,26 @@
 import pytest
 import time
 from coinmarketcap.v3.cryptocurrency.quotes.historical_v3 import _quotes_historical_v3
-from coinmarketcap.v1.cryptocurrency.listings.common import SortOption, AuxFields, SortDir, FilterOptions
+from coinmarketcap.v1.cryptocurrency.listings.common import (
+    SortOption,
+    AuxFields,
+    SortDir,
+    FilterOptions,
+)
 
 
 def test_cryptocurrency_quotes_historical_with_id(market_instance):
 
     timestamp_now = int(time.time())
-    timestamp_1_day_ago = timestamp_now - 60*60*24
+    timestamp_1_day_ago = timestamp_now - 60 * 60 * 24
 
     # Make the API call
     token_states = market_instance.quotes_historical(
         id="1",
         timestamp_start=timestamp_1_day_ago,
         timestamp_end=timestamp_now,
-        interval='1h',
-        convert=['USD', 'BTC']
+        interval="1h",
+        convert=["USD", "BTC"],
     )
 
     # Check if the response is a list and contains at least one item
@@ -35,7 +40,7 @@ def test_cryptocurrency_quotes_historical_with_id(market_instance):
     assert token_state.tags is None or isinstance(token_state.tags, list)
 
     # Check the attributes of the USD quote
-    quote = token_state.quote_map['USD']
+    quote = token_state.quote_map["USD"]
     assert isinstance(quote.price, float)
     assert isinstance(quote.volume_24h, float)
     assert isinstance(quote.percent_change_1h, float)
@@ -45,7 +50,7 @@ def test_cryptocurrency_quotes_historical_with_id(market_instance):
     assert isinstance(quote.last_updated, int)
 
     # Check the attributes of the BTC quote
-    quote = token_state.quote_map['BTC']
+    quote = token_state.quote_map["BTC"]
     assert isinstance(quote.price, float)
     assert isinstance(quote.volume_24h, float)
     assert isinstance(quote.percent_change_1h, float)
@@ -56,17 +61,17 @@ def test_cryptocurrency_quotes_historical_with_id(market_instance):
 
 
 def test_cryptocurrency_quotes_historical_with_ticker(market_instance):
-    
+
     timestamp_now = int(time.time())
-    timestamp_1_day_ago = timestamp_now - 60*60*24
-    
+    timestamp_1_day_ago = timestamp_now - 60 * 60 * 24
+
     # Make the API call
     token_states = market_instance.quotes_historical(
-        ticker='ETH',
+        ticker="ETH",
         timestamp_start=timestamp_1_day_ago,
         timestamp_end=timestamp_now,
-        interval='1h',
-        convert=['USD', 'BTC']
+        interval="1h",
+        convert=["USD", "BTC"],
     )
 
     # Check if the response is a list and contains at least one item
@@ -85,7 +90,7 @@ def test_cryptocurrency_quotes_historical_with_ticker(market_instance):
     assert isinstance(token_state.quote_map, dict)
 
     # Check the attributes of the USD quote
-    quote = token_state.quote_map['USD']
+    quote = token_state.quote_map["USD"]
     assert isinstance(quote.price, float)
     assert isinstance(quote.volume_24h, float)
     assert isinstance(quote.percent_change_1h, float)
@@ -95,7 +100,7 @@ def test_cryptocurrency_quotes_historical_with_ticker(market_instance):
     assert isinstance(quote.last_updated, int)
 
     # Check the attributes of the BTC quote
-    quote = token_state.quote_map['BTC']
+    quote = token_state.quote_map["BTC"]
     assert isinstance(quote.price, float)
     assert isinstance(quote.volume_24h, float)
     assert isinstance(quote.percent_change_1h, float)
@@ -112,7 +117,7 @@ def test_listings_latest(market_instance):
         price_max=100,
         volume_24h_min=1000000,
         percent_change_24h_min=-5,
-        tags=["defi"]
+        tags=["defi"],
     )
 
     # Define the aux fields
@@ -121,27 +126,27 @@ def test_listings_latest(market_instance):
         AuxFields.PLATFORM,
         AuxFields.TOTAL_SUPPLY,
         AuxFields.TAGS,
-        AuxFields.VOLUME_30D, 
-        AuxFields.CMC_RANK, 
-        AuxFields.DATE_ADDED, 
-        AuxFields.IS_MARKET_CAP_INCLUDED, 
-        AuxFields.MARKET_CAP_BY_TOTAL_SUPPLY, 
+        AuxFields.VOLUME_30D,
+        AuxFields.CMC_RANK,
+        AuxFields.DATE_ADDED,
+        AuxFields.IS_MARKET_CAP_INCLUDED,
+        AuxFields.MARKET_CAP_BY_TOTAL_SUPPLY,
         AuxFields.MAX_SUPPLY,
         AuxFields.VOLUME_30D_REPORTED,
-        AuxFields.VOLUME_30D, 
-        AuxFields.VOLUME_24H_REPORTED, 
+        AuxFields.VOLUME_30D,
+        AuxFields.VOLUME_24H_REPORTED,
         AuxFields.VOLUME_7D,
-        AuxFields.VOLUME_7D_REPORTED
+        AuxFields.VOLUME_7D_REPORTED,
     ]
 
     # Make the API call
     tokens = market_instance.listings_latest(
         sort_by=SortOption.MARKET_CAP,
         sort_dir=SortDir.DESC,
-        convert=['USD'],
+        convert=["USD"],
         limit=1,
         filters=filter,
-        aux_fields=aux_fields
+        aux_fields=aux_fields,
     )
 
     # Check if the response is a list and contains at least one item
@@ -165,77 +170,120 @@ def test_listings_latest(market_instance):
     assert token.total_supply is None or isinstance(token.total_supply, (int, float))
     assert token.platform is None or isinstance(token.platform, (str, dict))
     assert token.cmc_rank is None or isinstance(token.cmc_rank, int)
-    assert token.self_reported_circulating_supply is None or isinstance(token.self_reported_circulating_supply, int)
-    assert token.self_reported_market_cap is None or isinstance(token.self_reported_market_cap, float)
+    assert token.self_reported_circulating_supply is None or isinstance(
+        token.self_reported_circulating_supply, int
+    )
+    assert token.self_reported_market_cap is None or isinstance(
+        token.self_reported_market_cap, float
+    )
     assert token.tvl_ratio is None or isinstance(token.tvl_ratio, float)
-    assert token.is_market_cap_included_in_calc is None or isinstance(token.is_market_cap_included_in_calc, bool)
+    assert token.is_market_cap_included_in_calc is None or isinstance(
+        token.is_market_cap_included_in_calc, bool
+    )
+
 
 def test_quotes_historical_v3_implementation(market_instance):
     """Test the internal _quotes_historical_v3 implementation directly."""
-    from coinmarketcap.v3.cryptocurrency.quotes.historical_v3 import _quotes_historical_v3
-    
+    from coinmarketcap.v3.cryptocurrency.quotes.historical_v3 import (
+        _quotes_historical_v3,
+    )
+
     timestamp_now = int(time.time())
-    timestamp_1_day_ago = timestamp_now - 60*60*24
-    
+    timestamp_1_day_ago = timestamp_now - 60 * 60 * 24
+
     # Test with ID
     token_states = _quotes_historical_v3(
         market=market_instance,
         id="1",  # Bitcoin
         timestamp_start=timestamp_1_day_ago,
         timestamp_end=timestamp_now,
-        interval='hourly',
-        convert=['USD', 'BTC']
+        interval="hourly",
+        convert=["USD", "BTC"],
     )
-    
+
     # Basic validation
     assert isinstance(token_states, list)
     assert len(token_states) > 0
-    
+
     # Check first token state
     first_state = token_states[0]
     assert first_state.id == 1
     assert first_state.name == "Bitcoin"
     assert first_state.symbol == "BTC"
-    assert 'USD' in first_state.quote_map
-    assert 'BTC' in first_state.quote_map
-    
+    assert "USD" in first_state.quote_map
+    assert "BTC" in first_state.quote_map
+
     # Test with ticker
     token_states_ticker = _quotes_historical_v3(
         market=market_instance,
         ticker="ETH",
         timestamp_start=timestamp_1_day_ago,
         timestamp_end=timestamp_now,
-        interval='hourly',
-        convert=['USD']
+        interval="hourly",
+        convert=["USD"],
     )
-    
+
     # Basic validation for ticker-based query
     assert isinstance(token_states_ticker, list)
     assert len(token_states_ticker) > 0
-    
+
     # Check first token state
     first_ticker_state = token_states_ticker[0]
     assert first_ticker_state.symbol == "ETH"
-    assert 'USD' in first_ticker_state.quote_map
-    
+    assert "USD" in first_ticker_state.quote_map
+
     # Test error cases
     with pytest.raises(ValueError, match="Either id or ticker must be provided"):
         _quotes_historical_v3(market=market_instance)
-    
-    with pytest.raises(ValueError, match="The start timestamp occurr before than the end timestamp"):
+
+    with pytest.raises(
+        ValueError, match="The start timestamp occurr before than the end timestamp"
+    ):
         _quotes_historical_v3(
             market=market_instance,
             id="1",
             timestamp_start=timestamp_now,
-            timestamp_end=timestamp_1_day_ago
+            timestamp_end=timestamp_1_day_ago,
         )
-    
-    with pytest.raises(ValueError, match="The convert list must have a maximum of 3 elements"):
+
+    with pytest.raises(
+        ValueError, match="The convert list must have a maximum of 3 elements"
+    ):
         _quotes_historical_v3(
-            market=market_instance,
-            id="1",
-            convert=['USD', 'BTC', 'EUR', 'JPY']
+            market=market_instance, id="1", convert=["USD", "BTC", "EUR", "JPY"]
         )
+
+
+def test_quotes_latest(market_instance):
+    # WBTC (3717) and WETH (2396): the tokens that motivated this endpoint —
+    # CMC excludes wrapped tokens from ranked listings, so listings_latest
+    # can't return them. quotes_latest must, by ID.
+    token_states = market_instance.quotes_latest(ids=[3717, 2396])
+
+    assert isinstance(token_states, list)
+    assert len(token_states) == 2
+    assert {ts.id for ts in token_states} == {3717, 2396}
+
+    for token_state in token_states:
+        assert isinstance(token_state.symbol, str)
+        assert isinstance(token_state.last_updated, int)
+        assert isinstance(token_state.timestamp, int)
+
+        # Freshness contract: the quote must be recent, not a stale cache hit
+        assert token_state.last_updated > int(time.time()) - 60 * 60
+
+        quote = token_state.quote_map["USD"]
+        assert isinstance(quote.price, float)
+        assert quote.price > 0
+        assert isinstance(quote.last_updated, int)
+
+
+def test_quotes_latest_validation(market_instance):
+    with pytest.raises(ValueError, match="At least one CMC id"):
+        market_instance.quotes_latest(ids=[])
+
+    with pytest.raises(ValueError, match="maximum of 3 elements"):
+        market_instance.quotes_latest(ids=[1], convert=["USD", "BTC", "EUR", "JPY"])
 
 
 def test_cryptocurrency_info(market_instance):
@@ -289,10 +337,10 @@ def test_fear_and_greed_historical(market_instance):
 
     first = data[0]
     assert isinstance(first, dict)
-    assert set(first.keys()) >= {'timestamp', 'value', 'value_classification'}
-    assert isinstance(first['value_classification'], str)
+    assert set(first.keys()) >= {"timestamp", "value", "value_classification"}
+    assert isinstance(first["value_classification"], str)
     # 'value' is a 0-100 integer; CMC returns it as int
-    assert 0 <= int(first['value']) <= 100
+    assert 0 <= int(first["value"]) <= 100
 
 
 def test_map(market_instance):
@@ -312,7 +360,9 @@ def test_map(market_instance):
     assert isinstance(btc.slug, str)
 
     # The crypto-commons 0.5 contract: dates are unix ints.
-    assert btc.first_historical_data is None or isinstance(btc.first_historical_data, int)
+    assert btc.first_historical_data is None or isinstance(
+        btc.first_historical_data, int
+    )
     assert btc.last_historical_data is None or isinstance(btc.last_historical_data, int)
 
 
