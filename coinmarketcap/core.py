@@ -14,6 +14,7 @@ from crypto_commons.types.token_state import TokenState
 from crypto_commons.types.token_info import TokenInfo
 from crypto_commons.types.cryptocurrency_info import CryptocurrencyInfo
 from .v2.cryptocurrency.quotes.historical import _quotes_historical_v2
+from .v2.cryptocurrency.quotes.latest import _quotes_latest
 from .v2.cryptocurrency.info import _cryptocurrency_info
 from .v3.cryptocurrency.quotes.historical_v3 import _quotes_historical_v3
 from .v1.cryptocurrency.listings.latest import _listings_latest
@@ -279,6 +280,39 @@ class Market(object):
             interval=interval,
             convert=convert,
         )
+
+    def quotes_latest(
+        self,
+        ids: List[int],
+        convert: Optional[List[str]] = None,
+    ) -> List[TokenState]:
+        """Get the latest market quote for one or more cryptocurrencies by CMC ID.
+
+        Wraps the /v2/cryptocurrency/quotes/latest endpoint. Unlike
+        listings_latest, this returns any token by ID — including wrapped
+        tokens (e.g. WBTC id 3717, WETH id 2396) that CMC excludes from
+        ranked listings. Costs 1 credit per 100 IDs per convert option.
+
+        Responses are never served from the request cache: the purpose of
+        this endpoint is a fresh spot price.
+
+        Args:
+                ids (List[int]): CMC IDs of the cryptocurrencies to quote.
+                        At least one is required.
+                convert (List[str], optional): Currencies to convert values to
+                        (max 3). Defaults to ['USD'].
+
+        Returns:
+                List[TokenState]: One TokenState per requested ID, each with
+                        current price data in quote_map and last_updated as a
+                        unix timestamp int.
+
+        Raises:
+                ValueError: If no IDs are provided or more than 3 conversion
+                        currencies are specified.
+                ServerException: If the API request fails.
+        """
+        return _quotes_latest(self, ids=ids, convert=convert)
 
     def listings_latest(
         self,
