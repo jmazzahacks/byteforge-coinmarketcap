@@ -2,4 +2,4 @@ requests
 requests-cache
 python-dateutil
 requests-ratelimiter
-byteforge-crypto-commons>=0.5
+byteforge-crypto-commons>=0.7

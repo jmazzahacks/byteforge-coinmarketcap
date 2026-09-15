@@ -14,8 +14,10 @@ def _cryptocurrency_info(
     Fetch rich token metadata from CMC's /v2/cryptocurrency/info endpoint.
 
     Returns a dict keyed by CMC ID, with CryptocurrencyInfo values
-    containing name, symbol, slug, description, logo, tags, platform
-    (with on-chain contract address for cross-chain tokens), and URLs.
+    containing name, symbol, slug, description, logo, tags, platform,
+    contract_addresses (all deployments returned by CMC), and URLs.
+    The original platform is preserved; select a chain explicitly from
+    contract_addresses instead of assuming platform refers to Ethereum.
 
     Exactly one of (ids, slugs) must be provided. Batches up to 100 items
     per request — caller chunks if more are needed. Both query modes

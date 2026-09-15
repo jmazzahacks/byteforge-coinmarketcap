@@ -6,6 +6,7 @@ This project currently supports the following CoinMarketCap API endpoints:
 
 - `v1/cryptocurrency/listings/latest`: Get the latest market data for all cryptocurrencies
 - `v1/cryptocurrency/map`: Get a mapping of all cryptocurrencies to their CoinMarketCap IDs
+- `v2/cryptocurrency/info`: Get token metadata and per-chain contract addresses
 - `v2/cryptocurrency/quotes/historical`: Get historical quotes for cryptocurrencies (requires Hobbyist tier or higher)
 - `v3/cryptocurrency/quotes/historical`: Get historical quotes for cryptocurrencies with enhanced features (requires Hobbyist tier or higher)
 - `v4/dex/listings/info`: Get detailed information about specific decentralized exchanges (DEXs)
@@ -46,6 +47,33 @@ coinmarketcap = Market(api_key=API_KEY, rate_limit_per_minute=30)
 
 This SDK is crafted to fetch market data at specific points in time, offering a comprehensive snapshot of cryptocurrency metrics. Each method returns a list of `TokenState` objects, encapsulating detailed quotes for a cryptocurrency asset corresponding to particular timestamps. The `TokenState` object can include multiple quotes for the asset. For additional information, refer to the usage examples provided. 
 
+
+## Usage: Token metadata and contract addresses
+
+Version 4.2 adds `CryptocurrencyInfo.contract_addresses` and requires
+`byteforge-crypto-commons>=0.7`.
+
+```python
+usdc = coinmarketcap.cryptocurrency_info(ids=[3408])[3408]
+ethereum_contract = next(
+    (entry for entry in usdc.contract_addresses if entry.id == 1027),
+    None,
+)
+if ethereum_contract is not None:
+    print(ethereum_contract.token_address)
+```
+
+`contract_addresses` contains a `CryptocurrencyPlatform` for every entry in
+CMC's `contract_address` array, preserving order and address spelling. Its
+`id`, `name`, `symbol`, and `slug` come from `entry.platform.coin`; in particular,
+`name` uses the coin name rather than the platform display name. `id` is a CMC
+identifier (1027 for Ethereum), not an EVM chain ID. `token_address` comes from
+`entry.contract_address`. If the array is missing, null, or empty, the list is empty.
+
+The existing `platform` field retains CMC's original value. For multi-chain
+tokens it can refer to a different deployment, so select the desired chain
+explicitly from `contract_addresses`. The list's order does not express a
+preferred chain.
 
 ## Usage: API listings_latest
 

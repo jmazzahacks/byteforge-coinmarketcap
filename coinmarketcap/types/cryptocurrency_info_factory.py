@@ -28,6 +28,21 @@ class CryptocurrencyInfoFactory:
                 token_address=platform_data["token_address"],
             )
 
+        contract_addresses = []
+        for entry in data.get("contract_address") or []:
+            # Use CMC's coin identity, including coin.name rather than the
+            # platform display name. These IDs are CMC IDs, not EVM chain IDs.
+            coin = entry["platform"]["coin"]
+            contract_addresses.append(
+                CryptocurrencyPlatform(
+                    id=int(coin["id"]),
+                    name=coin["name"],
+                    symbol=coin["symbol"],
+                    slug=coin["slug"],
+                    token_address=entry["contract_address"],
+                )
+            )
+
         urls = None
         urls_data = data.get("urls")
         if urls_data is not None:
@@ -58,4 +73,5 @@ class CryptocurrencyInfoFactory:
             tags=data.get("tags") or [],
             platform=platform,
             urls=urls,
+            contract_addresses=contract_addresses,
         )

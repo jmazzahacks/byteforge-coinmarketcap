@@ -306,12 +306,21 @@ def test_cryptocurrency_info(market_instance):
     assert eth.symbol == "ETH"
     assert eth.platform is None
 
-    # USDC (id=3408) — ERC-20, platform should be populated with contract address
+
+def test_cryptocurrency_info_usdc_ethereum_contract(market_instance):
+    # CMC's single platform may refer to any USDC deployment, such as zkSync.
+    # Select Ethereum explicitly, regardless of platform or array order.
     usdc_map = market_instance.cryptocurrency_info(ids=[3408])
     usdc = usdc_map[3408]
     assert usdc.platform is not None
-    assert usdc.platform.symbol == "ETH"
     assert usdc.platform.token_address.startswith("0x")
+    ethereum_contracts = [entry for entry in usdc.contract_addresses if entry.id == 1027]
+    assert any(
+        entry.symbol == "ETH"
+        and entry.token_address.lower()
+        == "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+        for entry in ethereum_contracts
+    )
 
 
 def test_cryptocurrency_info_validation(market_instance):

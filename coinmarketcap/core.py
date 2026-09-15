@@ -359,6 +359,9 @@ class Market(object):
         name, symbol, slug, description, logo, tags, platform (with on-chain
         contract address for cross-chain tokens), and URLs. Exactly one of
         (ids, slugs) must be provided; both batch up to 100 items per call.
+        contract_addresses contains all deployments returned by CMC; select
+        the desired chain explicitly. platform retains CMC's original value.
+
         See _cryptocurrency_info for full docs.
         """
         return _cryptocurrency_info(self, ids=ids, slugs=slugs, aux=aux)
