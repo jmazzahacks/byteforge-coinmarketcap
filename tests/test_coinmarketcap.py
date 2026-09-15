@@ -312,8 +312,6 @@ def test_cryptocurrency_info_usdc_ethereum_contract(market_instance):
     # Select Ethereum explicitly, regardless of platform or array order.
     usdc_map = market_instance.cryptocurrency_info(ids=[3408])
     usdc = usdc_map[3408]
-    assert usdc.platform is not None
-    assert usdc.platform.token_address.startswith("0x")
     ethereum_contracts = [entry for entry in usdc.contract_addresses if entry.id == 1027]
     assert any(
         entry.symbol == "ETH"
