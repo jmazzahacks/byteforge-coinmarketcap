@@ -30,6 +30,8 @@ from .v1.cryptocurrency.map import _map, MapSortOption, MapAuxFields
 from .v3.fear_and_greed.historical import _fear_and_greed_historical
 from .v4.dex.listings.info import _dex_listings_info, DexAuxFields
 from .types.dex_info import DexInfo, DexUrls
+from .v1.exchange.info import _exchange_info
+from .types.exchange_info import ExchangeInfo
 
 
 class ServerException(Exception):
@@ -365,6 +367,30 @@ class Market(object):
         See _cryptocurrency_info for full docs.
         """
         return _cryptocurrency_info(self, ids=ids, slugs=slugs, aux=aux)
+
+    def exchange_info(
+        self,
+        ids: Optional[Union[int, List[int]]] = None,
+        slugs: Optional[List[str]] = None,
+        aux: Optional[List[str]] = None,
+    ) -> Dict[int, ExchangeInfo]:
+        """Fetch CEX or DEX metadata from /v1/exchange/info.
+
+        Provide exactly one selector: a positive ID, a nonempty list of IDs,
+        or a nonempty list of slugs. Returns ExchangeInfo objects keyed by
+        integer CMC ID in both query modes. Requests bypass the local cache.
+
+        aux=None uses CMC's defaults: urls, logo, description, date_launched,
+        notice. An explicit list selects fields from those names plus status;
+        aux=[] requests no auxiliary fields. Status remains None if omitted
+        by CMC. Dates and retrieval timestamp are Unix seconds.
+
+        This method supports centralized and decentralized exchanges and is
+        separate from dex_listings_info(); it does not fall back between APIs.
+        HTTP errors propagate as ServerException; invalid response maps or
+        unparseable records raise MalformedResponseError.
+        """
+        return _exchange_info(self, ids=ids, slugs=slugs, aux=aux)
 
     def dex_listings_info(
         self,

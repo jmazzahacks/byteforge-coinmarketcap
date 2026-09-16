@@ -6,6 +6,7 @@ This project currently supports the following CoinMarketCap API endpoints:
 
 - `v1/cryptocurrency/listings/latest`: Get the latest market data for all cryptocurrencies
 - `v1/cryptocurrency/map`: Get a mapping of all cryptocurrencies to their CoinMarketCap IDs
+- `v1/exchange/info`: Get metadata for centralized and decentralized exchanges
 - `v2/cryptocurrency/info`: Get token metadata and per-chain contract addresses
 - `v2/cryptocurrency/quotes/historical`: Get historical quotes for cryptocurrencies (requires Hobbyist tier or higher)
 - `v3/cryptocurrency/quotes/historical`: Get historical quotes for cryptocurrencies with enhanced features (requires Hobbyist tier or higher)
@@ -418,6 +419,48 @@ The Fear & Greed Index ranges from 0 to 100:
 - 51-74: Greed
 - 75-100: Extreme Greed
 
+## Usage: API exchange_info
+
+Use `exchange_info()` to fetch metadata for centralized or decentralized
+exchanges from CMC's `/v1/exchange/info` endpoint. Provide exactly one selector:
+a positive integer ID, a nonempty list of IDs, or a nonempty list of slugs.
+Both query modes return a dictionary keyed by integer CMC exchange ID, with
+`ExchangeInfo` values.
+
+```python
+from coinmarketcap import Market
+from coinmarketcap.types.exchange_info import ExchangeInfo, ExchangeUrls
+
+market = Market(api_key="your_api_key")
+exchanges = market.exchange_info(
+    ids=[11955, 1348],  # Uniswap v4 and v3 (Ethereum)
+    aux=["urls", "logo", "description", "date_launched", "notice", "status"],
+)
+uniswap = exchanges[1348]
+print(uniswap.name, uniswap.status, uniswap.urls.website)
+
+# Alternatively, look up by slug; the result is still keyed by CMC ID.
+exchanges = market.exchange_info(slugs=["uniswap-v3"], aux=["status", "urls"])
+```
+
+`aux=None` uses CMC's default fields: `urls`, `logo`, `description`,
+`date_launched`, and `notice`. Request `status` explicitly to obtain it;
+the model leaves it as `None` when absent. An explicit `aux` list selects
+the desired fields. The method bypasses the local request cache.
+
+`ExchangeInfo` includes `id`, `name`, `slug`, optional metadata fields,
+`countries`, `fiats`, `tags`, `type`, `maker_fee`, `taker_fee`, `weekly_visits`,
+`spot_volume_usd`, and `spot_volume_last_updated`. Date fields and the retrieval
+`timestamp` are Unix seconds. Missing/null collections become empty lists.
+`ExchangeUrls` preserves `website`, `twitter`, `blog`, `chat`, `fee`, `actual`,
+and `register`; unknown API fields are ignored. These models are defined in
+`coinmarketcap.types.exchange_info`.
+
+This is a separate method with a separate response model. It does not call
+`dex_listings_info()` or fall back to another endpoint on errors. HTTP errors
+raise `ServerException`; a missing/invalid response map or unparseable record raises
+`MalformedResponseError`.
+
 ## Usage: API dex_listings_info
 
 The `dex_listings_info` endpoint provides detailed information about specific decentralized exchanges (DEXs) by their CoinMarketCap IDs. Unlike other listing endpoints, this endpoint requires specific DEX IDs and does not support pagination, sorting, or filtering.
@@ -431,8 +474,11 @@ CMC lists the v4 DEX endpoints in its
 Its newer [platform endpoints](https://coinmarketcap.com/api/documentation/pro-api-reference/platform)
 describe blockchain networks, so they are not equivalent exchange metadata APIs.
 The SDK propagates these failures as `ServerException`; it does not substitute
-another endpoint or return an empty list. Endpoint availability needs confirmation
-from CMC before selecting a replacement.
+another endpoint or return an empty list. For exchange metadata, use the separate
+[`exchange_info()` method](#usage-api-exchange_info), which was verified for both
+Uniswap IDs. Its response is a dictionary of `ExchangeInfo` objects and `status`
+must be requested through `aux`. The cause and duration of the v4 failures still
+require confirmation from CMC.
 
 DEX request construction, response parsing, and HTTP error propagation can be
 tested without credentials or network access:
