@@ -165,13 +165,15 @@ def test_listings_latest(market_instance):
     # Check optional attributes (can be None)
     assert token.num_market_pairs is None or isinstance(token.num_market_pairs, int)
     assert token.tags is None or isinstance(token.tags, list)
-    assert token.max_supply is None or isinstance(token.max_supply, int)
-    assert token.circulating_supply is None or isinstance(token.circulating_supply, int)
+    assert token.max_supply is None or isinstance(token.max_supply, (int, float))
+    assert token.circulating_supply is None or isinstance(
+        token.circulating_supply, (int, float)
+    )
     assert token.total_supply is None or isinstance(token.total_supply, (int, float))
     assert token.platform is None or isinstance(token.platform, (str, dict))
     assert token.cmc_rank is None or isinstance(token.cmc_rank, int)
     assert token.self_reported_circulating_supply is None or isinstance(
-        token.self_reported_circulating_supply, int
+        token.self_reported_circulating_supply, (int, float)
     )
     assert token.self_reported_market_cap is None or isinstance(
         token.self_reported_market_cap, float

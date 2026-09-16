@@ -422,6 +422,28 @@ The Fear & Greed Index ranges from 0 to 100:
 
 The `dex_listings_info` endpoint provides detailed information about specific decentralized exchanges (DEXs) by their CoinMarketCap IDs. Unlike other listing endpoints, this endpoint requires specific DEX IDs and does not support pagination, sorting, or filtering.
 
+As of September 16, 2026, live requests to `/v4/dex/listings/info` returned
+HTTP 500 for both Uniswap v4 (11955) and Uniswap v3 (1348), including direct
+requests outside this SDK. `/v4/dex/listings/quotes` also returned 500, while
+`/v1/exchange/map` and `/v1/exchange/info` successfully identified both exchanges.
+CMC lists the v4 DEX endpoints in its
+[legacy reference](https://coinmarketcap.com/api/documentation/pro-api-reference/deprecated).
+Its newer [platform endpoints](https://coinmarketcap.com/api/documentation/pro-api-reference/platform)
+describe blockchain networks, so they are not equivalent exchange metadata APIs.
+The SDK propagates these failures as `ServerException`; it does not substitute
+another endpoint or return an empty list. Endpoint availability needs confirmation
+from CMC before selecting a replacement.
+
+DEX request construction, response parsing, and HTTP error propagation can be
+tested without credentials or network access:
+
+```bash
+python -m pytest -q tests/test_dex_offline.py tests/test_token_state_factory.py
+```
+
+`tests/test_dex.py` exercises the live service when `COIN_MARKET_CAP_API_KEY` is
+set. HTTP 500 responses remain test failures.
+
 ### Basic Usage
 
 ```python
