@@ -488,7 +488,8 @@ python -m pytest -q tests/test_dex_offline.py tests/test_token_state_factory.py
 ```
 
 `tests/test_dex.py` exercises the live service when `COIN_MARKET_CAP_API_KEY` is
-set. HTTP 500 responses remain test failures.
+set in a repo-root `.env` file (copy `example.env`; it is loaded by
+`tests/conftest.py` via python-dotenv). HTTP 500 responses remain test failures.
 
 ### Basic Usage
 
